@@ -25,8 +25,7 @@ const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
           if (typeof newValue === "string") {
             onChange(newValue);
           }
-        }
-      }
+        }}
     />
   )
 }
