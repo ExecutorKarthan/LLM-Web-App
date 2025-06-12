@@ -1,11 +1,11 @@
 
 import React, {useState} from "react";
-import MonacoEditor from 'react-monaco-editor';
+import {Editor} from '@monaco-editor/react';
 
 const PythonEditor = () => {
   const [writtenCode, updateCode] = useState(
-    `#Type your code here! Like this:
-    print("You can do this!")
+    `#Type your code here! Like this: 
+print("You can do this!")
     `
   )
 
@@ -14,18 +14,33 @@ const PythonEditor = () => {
   }
 
   return (
-    <>
-      <main>
-        <MonacoEditor
-          width="800"
-          height="600"
+    <>    
+        <Editor
+          height="600px"
           language="python"
           theme="vs-dark"
           value={writtenCode}
-          options={{selectOnLineNumbers: true, automaticLayout: true, lineDecorationsWidth: "0"}}
+          options={{autoIndent: 'full',
+            contextmenu: true,
+            fontFamily: 'monospace',
+            fontSize: 13,
+            lineHeight: 24,
+            hideCursorInOverviewRuler: true,
+            matchBrackets: 'always',
+            minimap: {
+              enabled: true,
+            },
+            scrollbar: {
+              horizontalSliderSize: 4,
+              verticalSliderSize: 18,
+            },
+            selectOnLineNumbers: true,
+            roundedSelection: false,
+            readOnly: false,
+            cursorStyle: 'line',
+            automaticLayout: true,}}
           onChange={() => updateEditor}
         />
-      </main>
     </>
   )
 }

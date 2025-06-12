@@ -2,8 +2,7 @@
 // import React, {useEffect, useRef, useState} from "react";
 import SkulptDisplay from './components/SkulptDisplay';
 import PythonEditor from "./components/PythonEditor";
-import './App.css'
-
+import { Row, Col } from 'antd';
 
 function App() {
   // const [writtenCode, updateCode] = useState(
@@ -18,10 +17,15 @@ function App() {
 
   return (
     <>
-      <main>
-        <PythonEditor />
+    <Row>
+      <Col span = {12}>
+        <PythonEditor/>  
+      </Col>
+      <Col span = {12}>
         <SkulptDisplay />
-      </main>
+      </Col>
+      
+    </Row>     
     </>
   )
 }
