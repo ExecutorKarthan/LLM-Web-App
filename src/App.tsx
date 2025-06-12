@@ -1,28 +1,24 @@
 
-// import React, {useEffect, useRef, useState} from "react";
+import {useState} from "react";
 import SkulptDisplay from './components/SkulptDisplay';
 import PythonEditor from "./components/PythonEditor";
 import { Row, Col } from 'antd';
 
 function App() {
-  // const [writtenCode, updateCode] = useState(
-  //   `#Type your code here! Like this:
-  //   print("You can do this!")
-  //   `
-  // )
-
-  // const updateEditor = (event: React.ChangeEvent<HTMLInputElement>)  => {
-  //   updateCode(event.currentTarget.value);
-  // }
+  const [writtenCode, updateCode] = useState <string>(
+    `#Type your code here! Like this: 
+print("You can do this!")
+    `
+  )
 
   return (
     <>
     <Row>
       <Col span = {12}>
-        <PythonEditor/>  
+        <PythonEditor code={writtenCode} onChange={updateCode}/>  
       </Col>
       <Col span = {12}>
-        <SkulptDisplay />
+        <SkulptDisplay code={writtenCode}/>
       </Col>
       
     </Row>     

@@ -1,47 +1,33 @@
 
-import React, {useState} from "react";
 import {Editor} from '@monaco-editor/react';
 
-const PythonEditor = () => {
-  const [writtenCode, updateCode] = useState(
-    `#Type your code here! Like this: 
-print("You can do this!")
-    `
-  )
+interface PythonEditorProps {
+  code: string;
+  onChange: (newCode: string) => void;
+}
 
-  const updateEditor = (event: React.ChangeEvent<HTMLInputElement>)  => {
-    updateCode(event.currentTarget.value);
-  }
+const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
+  const options = {
+    selectOnLineNumbers: true,
+    fontSize: 14,
+    minimap: { enabled: false },
+    automaticLayout: true,
+  };
 
   return (
-    <>    
-        <Editor
-          height="600px"
-          language="python"
-          theme="vs-dark"
-          value={writtenCode}
-          options={{autoIndent: 'full',
-            contextmenu: true,
-            fontFamily: 'monospace',
-            fontSize: 13,
-            lineHeight: 24,
-            hideCursorInOverviewRuler: true,
-            matchBrackets: 'always',
-            minimap: {
-              enabled: true,
-            },
-            scrollbar: {
-              horizontalSliderSize: 4,
-              verticalSliderSize: 18,
-            },
-            selectOnLineNumbers: true,
-            roundedSelection: false,
-            readOnly: false,
-            cursorStyle: 'line',
-            automaticLayout: true,}}
-          onChange={() => updateEditor}
-        />
-    </>
+     <Editor
+        height="600px"
+        language="python"
+        theme="vs-dark"
+        value={code}
+        options={options}
+        onChange={(newValue)  => {
+          if (typeof newValue === "string") {
+            onChange(newValue);
+          }
+        }
+      }
+    />
   )
 }
 
