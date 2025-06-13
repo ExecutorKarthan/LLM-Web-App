@@ -1,29 +1,22 @@
-import { useState } from "react";
+import Input from "antd/es/input/Input";
 
-interface LLMResponseProps {
-  userRequest: string;
+interface LLMEntryProps {
+    query: string;
+    onChange: (newQuery: string) => void;
 }
 
-const LLMResponseBox: React.FC<LLMResponseProps> = ({ userRequest }) => {
-  const [response, setResponse] = useState("");
+const LLMEntryBox: React.FC<LLMEntryProps> = ({onChange}) =>{
 
-  const submitRequest = async () => {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: userRequest }),
-    });
+    return(
+        <Input
+            showCount
+            placeholder="Enter your query to the LLM here."
+            style={{ height: 120, resize: 'none' }}
+            onChange={(e) => {
+                    onChange(e.target.value);
+            }}
+        />
+    )
+}
 
-    const data = await res.json();
-    setResponse(data.output);
-  };
-
-  return (
-    <div>
-      <button onClick={submitRequest}>Ask</button>
-      <p>{response}</p>
-    </div>
-  );
-};
-
-export default LLMResponseBox;
+export default LLMEntryBox;
