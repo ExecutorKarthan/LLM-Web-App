@@ -4,10 +4,14 @@
   "scripts": {
     "frontend": "cd frontend && npm install && npm run dev",
     "server": "cd backend && python manage.py runserver 0.0.0.0:8000",
-    "build": "cd frontend && npm ci && npm run build",
-    "start": "concurrently \"npm run server\" \"npm run frontend\""
+    "build": "cd frontend && npm install && npm run build",
+    "start": "concurrently \"npm run server\" \"npm run frontend\"",
+    "postinstall": "npm install --include=dev"
   },
   "devDependencies": {
     "concurrently": "^8.0.0"
+  },
+  "engines": {
+    "node": "22.x"
   }
 }
