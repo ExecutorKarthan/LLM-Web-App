@@ -1,7 +1,7 @@
 
 import {useState} from 'react';
-import LLMEntry from './components/LLMEntry';
-import LLMResponse from './components/LLMResponse';
+import LLMEntryBox from './components/LLMEntryBox';
+import LLMResponseBox from './components/LLMResponseBox';
 import PythonEditor from './components/PythonEditor';
 import SkulptDisplay from './components/SkulptDisplay';
 import { Row, Col } from 'antd';
@@ -19,10 +19,10 @@ print("You can do this!")
     <>
     <Row>
       <Col span = {12}>
-        <LLMEntry query = {userQuery} onChange={updateQuery}/> 
+        <LLMEntryBox query={userQuery} onChange={updateQuery}/> 
       </Col>
       <Col span = {12}>
-        <LLMResponse/>
+        <LLMResponseBox userRequest={userQuery}/>
       </Col>
     </Row>  
     <Row>

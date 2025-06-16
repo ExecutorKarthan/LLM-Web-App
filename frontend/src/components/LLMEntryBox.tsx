@@ -5,7 +5,7 @@ interface LLMEntryProps {
     onChange: (newQuery: string) => void;
 }
 
-const LLMEntry: React.FC<LLMEntryProps> = ({onChange}) =>{
+const LLMEntryBox: React.FC<LLMEntryProps> = ({onChange}) =>{
 
     return(
         <Input
@@ -19,4 +19,4 @@ const LLMEntry: React.FC<LLMEntryProps> = ({onChange}) =>{
     )
 }
 
-export default LLMEntry;
+export default LLMEntryBox;

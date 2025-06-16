@@ -1,31 +1,13 @@
 {
   "name": "llm-web-app",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && venv\\Scripts\\activate && python manage.py runserver",
+    "client": "cd frontend && npm run dev",
+    "lint": "cd frontend && npm run lint"
   },
-  "dependencies": {
-    "@monaco-editor/react": "^4.6.0",
-    "antd": "^5.26.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
-  },
- "devDependencies": {
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "@vitejs/plugin-react": "^4.4.1",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.19",
-    "globals": "^16.0.0",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5"
+  "devDependencies": {
+    "concurrently": "^8.2.0"
   }
 }
