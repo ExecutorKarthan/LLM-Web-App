@@ -1,13 +1,12 @@
 {
   "name": "llm-web-app",
-  "private": true,
+  "version": "1.0.0",
   "scripts": {
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd backend && venv\\Scripts\\activate && python manage.py runserver",
-    "client": "cd frontend && npm run dev",
-    "lint": "cd frontend && npm run lint"
+    "frontend": "cd frontend && npm install && npm run dev",
+    "server": "cd backend && call venv\\Scripts\\activate && python manage.py runserver",
+    "start": "concurrently \"npm run server\" \"npm run client\""
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.0.0"
   }
 }
