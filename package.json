@@ -4,7 +4,7 @@
   "scripts": {
     "frontend": "cd frontend && npm install && npm run dev",
     "server": "cd backend && call venv\\Scripts\\activate && python manage.py runserver",
-    "start": "concurrently \"npm run server\" \"npm run client\""
+    "start": "concurrently \"npm run server\" \"npm run frontend\""
   },
   "devDependencies": {
     "concurrently": "^8.0.0"
