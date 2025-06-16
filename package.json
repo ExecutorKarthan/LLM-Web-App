@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "frontend": "cd frontend && npm install && npm run dev",
-    "server": "cd backend && call venv\\Scripts\\activate && python manage.py runserver",
+    "server": "cd backend && python manage.py runserver 0.0.0.0:8000",
+    "build": "cd frontend && npm install && npm run build",
     "start": "concurrently \"npm run server\" \"npm run frontend\""
   },
   "devDependencies": {
