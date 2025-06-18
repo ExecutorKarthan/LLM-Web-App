@@ -7,7 +7,6 @@ interface LLMResponseProps {
 
 const LLMResponseBox: React.FC<LLMResponseProps> = ({userRequest}) =>{
   const [response, setResponse] = useState<string>("");
-  console.log(import.meta.env.VITE_BACKEND_URL)
    const submitRequest = async () => {
     try {
       const res = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/ask/", {
