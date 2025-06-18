@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface SplashGateProps {
   onUnlock: (apiKey: string) => void;
@@ -8,13 +8,6 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
-
-  function setCookie(name: string, value: string, days?: number): void {
-  const expires = days
-    ? "; expires=" + new Date(Date.now() + days * 864e5).toUTCString()
-    : "";
-  document.cookie = `${name}=${encodeURIComponent(value)}${expires}; path=/`;
-}
 
   const handleSubmit = () => {
     if (!agreed) {
@@ -26,8 +19,6 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
       return;
     }
 
-    localStorage.setItem("agreedToTerms", "true");
-    localStorage.setItem("userApiKey", apiKey.trim());
     onUnlock(apiKey.trim());
   };
 
