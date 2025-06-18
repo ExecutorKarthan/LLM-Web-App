@@ -1,40 +1,23 @@
-
-import {useState} from 'react';
-import LLMEntryBox from './components/LLMEntryBox';
-import LLMResponseBox from './components/LLMResponseBox';
-import PythonEditor from './components/PythonEditor';
-import SkulptDisplay from './components/SkulptDisplay';
-import { Row, Col } from 'antd';
+import { useState } from "react";
+import SplashGate from "./components/Splashgate";
+import MainApp from "./components/MainApp";
 
 function App() {
-  const [userQuery, updateQuery] = useState <string>(""
-  )
-  const [writtenCode, updateCode] = useState <string>(
-    `#Type your code here! Like this: 
-print("You can do this!")
-    `
-  )
+  // Store API key in React state only — no persistence
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
-  return (
-    <>
-    <Row>
-      <Col span = {12}>
-        <LLMEntryBox query={userQuery} onChange={updateQuery}/> 
-      </Col>
-      <Col span = {12}>
-        <LLMResponseBox userRequest={userQuery}/>
-      </Col>
-    </Row>  
-    <Row>
-      <Col span = {12}>
-        <PythonEditor code={writtenCode} onChange={updateCode}/>  
-      </Col>
-      <Col span = {12}>
-        <SkulptDisplay code={writtenCode}/>
-      </Col>
-    </Row>     
-    </>
-  )
+  // Called when user enters their API key (e.g., via SplashGate)
+  const handleUnlock = (key: string) => {
+    setApiKey(key);
+  };
+
+  // If no API key, show SplashGate to collect it
+  if (!apiKey) {
+    return <SplashGate onUnlock={handleUnlock} />;
+  }
+
+  // If API key is set, show main app with key passed as prop
+  return <MainApp userApiKey={apiKey} />;
 }
 
-export default App
+export default App;

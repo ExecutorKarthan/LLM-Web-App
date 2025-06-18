@@ -5,8 +5,8 @@ import os
 
 @api_view(["POST"])
 def ask_gemini(request):
-    prompt = request.data.get("prompt", "")
-    api_key = os.getenv("GEMINI_KEY")
+    prompt = request.data.get("prompt")
+    api_key = request.data.get("apiKey")
     if not api_key:
         return Response({"error": "OpenAI API key is not set."}, status=500)
 
