@@ -1,5 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
+import dotenv from 'dotenv';
+dotenv.config(); // 
 
 interface LLMResponseProps {
     userRequest: string;
@@ -9,7 +11,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({userRequest}) =>{
   const [response, setResponse] = useState<string>("");
    const submitRequest = async () => {
     try {
-      const res = await axios.post("http://localhost:8000/api/ask/", {
+      const res = await axios.post(process.env.BACKEND_URL+"/api/ask/", {
         prompt: userRequest,
       });
 
