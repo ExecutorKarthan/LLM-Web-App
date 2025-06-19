@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import processResponse from "../utils/responseProcessor"
 
 interface LLMResponseProps {
     userRequest: string;
@@ -15,7 +16,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({userRequest, userApiKey}) =
         apiKey: userApiKey,
       });
 
-      setResponse(res.data.response); // Adjust to match your Django response key
+      setResponse(res.data.response);
     } catch (error) {
       console.error("Error calling backend:", error);
       setResponse("Error processing your request.");
@@ -27,7 +28,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({userRequest, userApiKey}) =
       <button onClick={submitRequest} style={{ padding: "10px" }}>
         Submit request
       </button>
-      <p>{response}</p>
+      {processResponse(response)}
     </div>
   );
 };
