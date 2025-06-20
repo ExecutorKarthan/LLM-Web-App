@@ -132,8 +132,8 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
       <div
         ref={canvasRef}
         style={{
-          width: "400px",
-          height: "400px",
+          width: "600px",
+          height: "600px",
           border: "1px solid black",
           backgroundColor: "white",
         }}

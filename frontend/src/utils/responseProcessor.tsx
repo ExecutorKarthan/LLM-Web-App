@@ -1,36 +1,36 @@
 import React from "react";
 
 function processedResponse(response: string): React.ReactNode[] {
-    const result: string[] = [];
-    const lines = response.split("\n");
+  const lines = response.split("\n");
+  let indentLine = false;
 
-    for (const line of lines) {
-        result.push(line);
+  return lines.map((value, index) => {
+    const trimmed = value.trim();
+
+    if (
+      (trimmed.startsWith("def") || trimmed.startsWith("if") || trimmed.startsWith("else")) &&
+      trimmed.endsWith(":")
+    ) {
+      indentLine = true;
+      return <p key={index}><strong>{value}</strong></p>;
     }
 
-    let indentLine = false;
+    const leadingSpacesMatch = value.match(/^(\s*)/);
+    const leadingSpaces = leadingSpacesMatch ? leadingSpacesMatch[0].length : 0;
 
-    return result.map((value, index) => {
-        const trimmed = value.trim();
-         console.log(value)
+    const paddingLeft = leadingSpaces * 5;
 
-        // Check if line starts with def, if, or else and ends with :
-        if (
-            (trimmed.startsWith("def") || trimmed.startsWith("if") || trimmed.startsWith("else")) &&
-            trimmed.endsWith(":")
-        ) {
-            indentLine = true;
-            return <p key={index}><strong>{value}</strong></p>;
-        }
+    if (indentLine && leadingSpaces > 0) {
+      return (
+        <p key={index} style={{ paddingLeft: `${paddingLeft}px`, fontFamily: "monospace" }}>
+          {value}
+        </p>
+      );
+    }
 
-        if (indentLine && value.startsWith("    ")) {
-            return <p key={index} style={{ paddingLeft: "20px" }}>{value}</p>;
-        }
-
-        indentLine = false;
-        console.log(value)
-        return <p key={index}>{value}</p>;
-    });
+    indentLine = false;
+    return <p key={index} style={{ fontFamily: "monospace" }}>{value}</p>;
+  });
 }
 
 export default processedResponse;
