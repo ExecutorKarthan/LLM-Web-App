@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 interface SkulptDisplayProps {
   code: string;
@@ -36,12 +36,12 @@ interface SkulptConfigureOptions {
   read?: (filename: string) => string;
 }
 
-type SkulptExecutionResult = Promise<void>; 
-
+type SkulptExecutionResult = Promise<void>;
 
 const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
   const outputRef = useRef<HTMLPreElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  const [outputText, setOutputText] = useState<string>("");
 
   useEffect(() => {
     if (!window.Sk) {
@@ -57,9 +57,7 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
   }, []);
 
   const outf = (text: string) => {
-    if (outputRef.current) {
-      outputRef.current.innerHTML += text;
-    }
+    setOutputText((prev) => prev + text);
   };
 
   const builtinRead = (x: string) => {
@@ -75,8 +73,11 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
       return;
     }
 
-    if (outputRef.current) outputRef.current.innerHTML = "";
+    setOutputText("");
     if (canvasRef.current) canvasRef.current.innerHTML = "";
+
+    const width = canvasRef.current?.clientWidth ?? 600;
+    const height = canvasRef.current?.clientHeight ?? 600;
 
     window.Sk.configure({
       output: outf,
@@ -85,59 +86,117 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
 
     window.Sk.TurtleGraphics = {
       target: canvasRef.current,
-      width: 400,
-      height: 400,
+      width,
+      height,
     };
+
+    // Inject preamble to setup turtle screen with canvas size and centered coords
+    const injectedPreamble = `
+import turtle
+screen = turtle.Screen()
+screen.setup(width=${width}, height=${height})
+screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}, ${Math.floor(width / 2)}, ${Math.floor(height / 2)})
+
+# Warning: User code has been modified to fit drawing inside the display.
+# This was done to center graphics and prevent drawings larger than the canvas.
+`;
+
+    const combinedCode = injectedPreamble + "\n" + code;
 
     window.Sk.misceval
       .asyncToPromise(() =>
-        window.Sk.importMainWithBody("<stdin>", false, code, true)
+        window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
       )
       .then(
         () => console.log("Execution success"),
         (err: unknown) => {
-            let errorMessage = "Unknown error";
-            if (err instanceof Error) {
-                errorMessage = err.message;
-                console.error(err.message);
-            } else if (typeof err === "string") {
-                errorMessage = err;
-                console.error(err);
-            }
+          let errorMessage = "Unknown error";
+          if (err instanceof Error) {
+            errorMessage = err.message;
+            console.error(err.message);
+          } else if (typeof err === "string") {
+            errorMessage = err;
+            console.error(err);
+          }
 
-            if (outputRef.current) {
-                outputRef.current.innerHTML +=
-                "<br><strong style='color:red'>Error: </strong>" + errorMessage;
-            }
+          setOutputText(
+            (prev) =>
+              prev +
+              "<br><strong style='color:red'>Error: </strong>" +
+              errorMessage
+          );
         }
       );
   };
 
+  // Check if canvas has children to show graphic output
+  const hasGraphicOutput = canvasRef.current?.children.length !== 0;
+  const hasTextOutput = outputText.trim().length > 0;
+
   return (
-    <div style={{ marginTop: "20px" }}>
-      <button onClick={runCode} style={{ padding: "10px" }}>Run Code</button>
+    <div
+      style={{
+        marginTop: "20px",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        boxSizing: "border-box",
+      }}
+    >
+      <button
+        onClick={runCode}
+        style={{ padding: "10px", alignSelf: "center" }}
+      >
+        Run Code
+      </button>
 
-      <h4>Print Output:</h4>
-      <pre
-        ref={outputRef}
-        style={{
-          backgroundColor: "#f0f0f0",
-          padding: "10px",
-          minHeight: "100px",
-          whiteSpace: "pre-wrap",
-        }}
-      ></pre>
+      {hasGraphicOutput && (
+        <div
+          ref={canvasRef}
+          style={{
+            flexGrow: 1,
+            minHeight: 200,
+            border: "1px solid black",
+            backgroundColor: "white",
+            marginTop: 16,
+            width: "100%",
+            maxHeight: 600,
+          }}
+        />
+      )}
 
-      <h4>Turtle Graphics:</h4>
-      <div
-        ref={canvasRef}
-        style={{
-          width: "600px",
-          height: "600px",
-          border: "1px solid black",
-          backgroundColor: "white",
-        }}
-      />
+      {hasTextOutput && (
+        <pre
+          ref={outputRef}
+          style={{
+            backgroundColor: "#f0f0f0",
+            padding: "10px",
+            minHeight: 100,
+            maxHeight: 200,
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
+            marginTop: hasGraphicOutput ? 16 : 20,
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+          dangerouslySetInnerHTML={{ __html: outputText }}
+        />
+      )}
+
+      {!hasGraphicOutput && !hasTextOutput && (
+        <div
+          ref={canvasRef}
+          style={{
+            width: "100%",
+            minHeight: 200,
+            border: "1px solid black",
+            backgroundColor: "white",
+            marginTop: 16,
+            flexGrow: 1,
+            maxHeight: 600,
+          }}
+        />
+      )}
     </div>
   );
 };

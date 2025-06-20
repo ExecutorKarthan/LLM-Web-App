@@ -17,7 +17,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div
         style={{
-          flexGrow: 1,
+          height: 280,           // fixed height (adjust to match your entry box height)
           overflowY: "auto",
           whiteSpace: "pre-wrap",
           backgroundColor: "#1e1e1e",
