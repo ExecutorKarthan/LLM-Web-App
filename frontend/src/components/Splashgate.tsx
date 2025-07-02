@@ -23,7 +23,8 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/store-key/", {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
+      const response = await fetch(`${backendUrl}/api/store-key/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
