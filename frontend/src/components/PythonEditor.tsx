@@ -1,5 +1,4 @@
-
-import {Editor} from '@monaco-editor/react';
+import { Editor } from '@monaco-editor/react';
 
 interface PythonEditorProps {
   code: string;
@@ -15,19 +14,21 @@ const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
   };
 
   return (
-     <Editor
-        height="600px"
+    <div style={{ height: "100%", width: "100%", boxSizing: "border-box" }}>
+      <Editor
         language="python"
         theme="vs-dark"
         value={code}
         options={options}
-        onChange={(newValue)  => {
+        onChange={(newValue) => {
           if (typeof newValue === "string") {
             onChange(newValue);
           }
         }}
-    />
-  )
-}
+        height="100%" // now fills parent div
+      />
+    </div>
+  );
+};
 
-export default PythonEditor
+export default PythonEditor;
