@@ -1,38 +1,25 @@
-import { useEffect, useState } from "react";
-import SplashGate from "./components/Splashgate";
+import { useState, useEffect } from "react";
+import SplashGate from "./components/SplashGate";
 import MainApp from "./components/MainApp";
 
-function App() {
+const App = () => {
   const [token, setToken] = useState<string | null>(null);
 
+  // Optional: Clear token on tab close
   useEffect(() => {
-    const handleUnload = () => {
-      if (token) {
-        navigator.sendBeacon(
-          import.meta.env.VITE_BACKEND_URL + "/api/remove-key/",
-          JSON.stringify({ token })
-        );
-      }
+    const handleBeforeUnload = () => {
+      setToken(null);  // wipe token on tab close or refresh
     };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
-    window.addEventListener("beforeunload", handleUnload);
-    return () => window.removeEventListener("beforeunload", handleUnload);
-  }, [token]);
+  if (!token) {
+    return <SplashGate onUnlock={setToken} />;
+  }
 
-  const handleUnlock = async (key: string) => {
-    const res = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/store-key/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ apiKey: key }),
-    });
-
-    const data = await res.json();
-    if (data.token) {
-      setToken(data.token);
-    }
-  };
-
-  return token ? <MainApp token={token} /> : <SplashGate onUnlock={handleUnlock} />;
-}
+  // Pass token to main app for authenticated API calls
+  return <MainApp token={token} />;
+};
 
 export default App;

@@ -1,15 +1,17 @@
 import { useState } from "react";
 
 interface SplashGateProps {
-  onUnlock: (apiKey: string) => void;
+  onUnlock: (token: string) => void;  // Now passing token back
 }
 
 const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError("");
     if (!agreed) {
       setError("You must agree to the terms.");
       return;
@@ -19,7 +21,33 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
       return;
     }
 
-    onUnlock(apiKey.trim());
+    setLoading(true);
+    try {
+      const response = await fetch("/api/store-key/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ apiKey: apiKey.trim() }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to save API key");
+      }
+
+      const data = await response.json();
+
+      // Pass token back to parent component
+      onUnlock(data.token);
+
+      // Wipe API key input immediately after sending
+      setApiKey("");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -46,13 +74,18 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
+          disabled={loading}
         />
       </label>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <button onClick={handleSubmit} style={{ padding: "0.75rem 1.5rem" }}>
-        Continue
+      <button
+        onClick={handleSubmit}
+        style={{ padding: "0.75rem 1.5rem" }}
+        disabled={loading}
+      >
+        {loading ? "Submitting..." : "Continue"}
       </button>
     </div>
   );
