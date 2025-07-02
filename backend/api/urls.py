@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import ask_gemini
+from . import views
 
 urlpatterns = [
-    path("ask/", ask_gemini),
+    path("store-key/", views.store_api_key),
+    path("ask/", views.ask_with_key),
+    path("remove-key/", views.remove_api_key),
 ]

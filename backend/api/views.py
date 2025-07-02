@@ -1,42 +1,44 @@
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from google import genai
-import traceback
+# views.py
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.core.cache import cache
+import json
+import os
+import redis
 
-@api_view(["POST"])
-def ask_gemini(request):
-    try:
-        prompt = request.data.get("prompt")
-        api_key = request.data.get("apiKey")
+@csrf_exempt
+def store_api_key(request):
+    token = "abc123"
+    print(os.environ["REDIS_URL"])
+    connection = redis.Redis.from_url(os.environ["REDIS_URL"])
+    connection.set(f"api_key:{token}", "your-api-key-value")  # TTL 1 hour
+    return JsonResponse({"success": True})
 
+
+
+@csrf_exempt
+def ask_with_key(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        token = data.get("token")
+        prompt = data.get("prompt")
+
+        if not token or not prompt:
+            return JsonResponse({"error": "Missing token or prompt."}, status=400)
+
+        api_key = cache.get(f"api_key:{token}")
         if not api_key:
-            return Response(
-                {"error": "API key is missing in request."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return JsonResponse({"error": "API key expired or invalid."}, status=403)
 
-        if not prompt:
-            return Response(
-                {"error": "Prompt is missing in request."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        client = genai.Client(api_key=api_key)
+        # Use the API key (mocked here)
+        return JsonResponse({"response": f"API call with: {prompt} using key: {api_key[:4]}****"})
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
 
-        message = response.text
-        return Response({"response": message}, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        # Log full traceback to console
-        print("Error in ask_gemini view:")
-        traceback.print_exc()
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+@csrf_exempt
+def remove_api_key(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        token = data.get("token")
+        if token:
+            cache.delete(f"api_key:{token}")
+        return JsonResponse({"status": "cleared"})
