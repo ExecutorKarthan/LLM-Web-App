@@ -1,7 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
+import processResponse from "../utils/responseProcessor";
+import puzzle1Img from "../assets/puzzle-images/puzzle1.png";
+import puzzle1Code from "../assets/puzzle-code/puzzle1.txt";
+
 
 interface SkulptDisplayProps {
   code: string;
+  onCodeChange?: (newCode: string) => void;
 }
 
 declare global {
@@ -17,7 +22,7 @@ interface Skulpt {
     dumpGlobals: boolean,
     body: string,
     canSuspend: boolean
-  ) => SkulptExecutionResult;
+  ) => Promise<void>;
   misceval: {
     asyncToPromise: <T>(fn: () => T | Promise<T>) => Promise<T>;
   };
@@ -36,12 +41,11 @@ interface SkulptConfigureOptions {
   read?: (filename: string) => string;
 }
 
-type SkulptExecutionResult = Promise<void>;
-
-const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
+const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code, onCodeChange }) => {
   const outputRef = useRef<HTMLPreElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [outputText, setOutputText] = useState<string>("");
+  const [showPuzzle, setShowPuzzle] = useState<boolean>(false);
 
   useEffect(() => {
     if (!window.Sk) {
@@ -56,15 +60,15 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
     }
   }, []);
 
-  const outf = (text: string) => {
-    setOutputText((prev) => prev + text);
-  };
-
   const builtinRead = (x: string) => {
     if (!window.Sk.builtinFiles || !window.Sk.builtinFiles["files"][x]) {
       throw new Error(`File not found: '${x}'`);
     }
     return window.Sk.builtinFiles["files"][x];
+  };
+
+  const outf = (text: string) => {
+    setOutputText((prev) => prev + text);
   };
 
   const runCode = () => {
@@ -73,8 +77,13 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
       return;
     }
 
+    // Hide puzzle when running code
+    setShowPuzzle(false);
     setOutputText("");
-    if (canvasRef.current) canvasRef.current.innerHTML = "";
+
+    if (canvasRef.current) {
+      canvasRef.current.innerHTML = "";
+    }
 
     const width = canvasRef.current?.clientWidth ?? 600;
     const height = canvasRef.current?.clientHeight ?? 600;
@@ -90,15 +99,11 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
       height,
     };
 
-    // Inject preamble to setup turtle screen with canvas size and centered coords
     const injectedPreamble = `
 import turtle
 screen = turtle.Screen()
 screen.setup(width=${width}, height=${height})
 screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}, ${Math.floor(width / 2)}, ${Math.floor(height / 2)})
-
-# Warning: User code has been modified to fit drawing inside the display.
-# This was done to center graphics and prevent drawings larger than the canvas.
 `;
 
     const combinedCode = injectedPreamble + "\n" + code;
@@ -129,9 +134,19 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
       );
   };
 
-  // Check if canvas has children to show graphic output
-  const hasGraphicOutput = canvasRef.current?.children.length !== 0;
-  const hasTextOutput = outputText.trim().length > 0;
+ const handleShowPuzzle = async () => {
+  try {
+    const res = await fetch("/assets/puzzle-code/puzzle.txt");
+    if (!res.ok) throw new Error("Failed to load puzzle code");
+
+    const text = await res.text();
+    onCodeChange?.(text);
+    setShowPuzzle(true);
+  } catch (err) {
+    console.error("Error loading puzzle code:", err);
+  }
+};
+
 
   return (
     <div
@@ -143,59 +158,52 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
         boxSizing: "border-box",
       }}
     >
-      <button
-        onClick={runCode}
-        style={{ padding: "10px", alignSelf: "center" }}
-      >
-        Run Code
-      </button>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={runCode}>Run Code</button>
+        <button onClick={handleShowPuzzle}>Show Puzzle</button>
+      </div>
 
-      {hasGraphicOutput && (
-        <div
-          ref={canvasRef}
+      {showPuzzle ? (
+        <img
+          src={puzzle1Img}
+          alt="Puzzle"
           style={{
-            flexGrow: 1,
-            minHeight: 200,
-            border: "1px solid black",
-            backgroundColor: "white",
-            marginTop: 16,
-            width: "100%",
-            maxHeight: 600,
+            marginTop: 20,
+            maxWidth: "100%",
+            height: "auto",
+            border: "1px solid #ccc",
           }}
         />
-      )}
-
-      {hasTextOutput && (
-        <pre
-          ref={outputRef}
-          style={{
-            backgroundColor: "#f0f0f0",
-            padding: "10px",
-            minHeight: 100,
-            maxHeight: 200,
-            overflowY: "auto",
-            whiteSpace: "pre-wrap",
-            marginTop: hasGraphicOutput ? 16 : 20,
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-          dangerouslySetInnerHTML={{ __html: outputText }}
-        />
-      )}
-
-      {!hasGraphicOutput && !hasTextOutput && (
-        <div
-          ref={canvasRef}
-          style={{
-            width: "100%",
-            minHeight: 200,
-            border: "1px solid black",
-            backgroundColor: "white",
-            marginTop: 16,
-            flexGrow: 1,
-            maxHeight: 600,
-          }}
-        />
+      ) : (
+        <>
+          <div
+            ref={canvasRef}
+            style={{
+              marginTop: 20,
+              minHeight: 200,
+              maxHeight: 600,
+              flexGrow: 1,
+              border: "1px solid black",
+              backgroundColor: "white",
+              width: "100%",
+            }}
+          />
+          <pre
+            ref={outputRef}
+            style={{
+              backgroundColor: "#f0f0f0",
+              padding: "10px",
+              minHeight: 100,
+              maxHeight: 200,
+              overflowY: "auto",
+              whiteSpace: "pre-wrap",
+              marginTop: 20,
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+            dangerouslySetInnerHTML={{ __html: outputText }}
+          />
+        </>
       )}
     </div>
   );

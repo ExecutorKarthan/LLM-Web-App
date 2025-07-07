@@ -37,6 +37,32 @@ def draw_grid(size, box_size, path):
             turtle_instance.end_fill()
             turtle_instance.penup()
 
+def move_turtle_along_path(path, box_size, grid_size):
+    """Moves a visible turtle along the specified path."""
+    player_turtle = turtle.Turtle()
+    player_turtle.shape("turtle")
+    player_turtle.color("purple")
+    player_turtle.penup()
+    player_turtle.speed(1) # Set speed to a reasonable value
+
+    start_row, start_col = 0, 0
+    x = (start_col - grid_size // 2) * box_size + box_size//2 
+    y = (grid_size // 2 - start_row) * box_size + box_size//2
+
+    player_turtle.goto(x, y)
+    player_turtle.pendown()
+
+    for i in range(0, len(path)):
+        curr_row, curr_col = path[i]
+        if(i+1 < len(path)):
+            tar_row, tar_col = path[i+1]
+        if((tar_row - curr_row) > 0):
+            y = y - box_size
+        if((tar_col - curr_col) > 0):
+            x = x + box_size
+        player_turtle.goto(x, y)
+
+
 
 grid_size = 20
 box_size = 20
@@ -46,4 +72,6 @@ path = [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (3, 2), (4, 2), (4, 3), (4, 4), 
 
 # Draw the grid with the path
 draw_grid(grid_size, box_size, path)
+move_turtle_along_path(path, box_size, grid_size)
 
+turtle.done()

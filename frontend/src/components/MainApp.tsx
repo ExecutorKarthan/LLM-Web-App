@@ -125,7 +125,7 @@ print("You can do this!")
             minHeight: 350,
           }}
         >
-          <SkulptDisplay code={writtenCode} />
+          <SkulptDisplay code={writtenCode} onCodeChange={updateCode} />
         </Col>
       </Row>
     </>
