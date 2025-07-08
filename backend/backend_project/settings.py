@@ -25,9 +25,16 @@ DEBUG = os.getenv("DEBUG") == "True"
 BASE_DIR = Path(__file__).resolve().parent.parent
 STATIC_URL = '/static/'
 
-# STATIC_ROOT = BASE_DIR / 'staticfiles'
+# backend/backend_project/settings.py
+# ...
+STATIC_URL = '/static/' # Keep this as is
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'assets' / 'static',
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
 PUZZLE_CODE_DIR = BASE_DIR / "assets/puzzles"
-# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ALLOWED_HOSTS = ["*"]
 

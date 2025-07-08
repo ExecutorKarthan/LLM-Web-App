@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/', include('api.urls')),
 ]
 
-if settings.DEBUG:
-    # Adding a print here to confirm this block is hit and what document_root it uses
-    print(f"DEBUG is TRUE. Adding static URL pattern with document_root: {os.path.join(settings.BASE_DIR, 'assets/static')}")
-    urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'assets/static'))
+# if settings.DEBUG:
+#     # Adding a print here to confirm this block is hit and what document_root it uses
+#     print(f"DEBUG is TRUE. Adding static URL pattern with document_root: {os.path.join(settings.BASE_DIR, 'assets/static')}")
+#     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'assets/static'))
