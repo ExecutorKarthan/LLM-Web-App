@@ -1,8 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import processResponse from "../utils/responseProcessor";
 import puzzle1Img from "../assets/puzzle-images/puzzle1.png";
-import puzzle1Code from "../assets/puzzle-code/puzzle1.txt";
-
 
 interface SkulptDisplayProps {
   code: string;
@@ -136,14 +133,13 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
 
  const handleShowPuzzle = async () => {
   try {
-    const res = await fetch("/assets/puzzle-code/puzzle.txt");
+    const res = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/1/");
     if (!res.ok) throw new Error("Failed to load puzzle code");
-
-    const text = await res.text();
-    onCodeChange?.(text);
+    const data = await res.json();
+    onCodeChange?.(data.code);
     setShowPuzzle(true);
   } catch (err) {
-    console.error("Error loading puzzle code:", err);
+    console.error("Failed to load puzzle from backend:", err);
   }
 };
 

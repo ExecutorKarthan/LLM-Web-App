@@ -4,6 +4,23 @@ from rest_framework import status
 from google import genai
 import traceback
 
+from django.http import JsonResponse, HttpResponseNotFound
+import os
+
+PUZZLE_DIR = os.path.join(os.path.dirname(__file__), '../assets/puzzles')
+
+def get_puzzle_code(request, puzzle_id):
+    filename = f"puzzle{puzzle_id}.txt"
+    filepath = os.path.join(PUZZLE_DIR, filename)
+
+    if not os.path.exists(filepath):
+        return HttpResponseNotFound("Puzzle not found")
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    return JsonResponse({"code": content})
+
 @api_view(["POST"])
 def ask_gemini(request):
     try:
