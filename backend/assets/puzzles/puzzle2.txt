@@ -1,6 +1,3 @@
-import turtle
-import random
-
 def draw_grid(size, box_size, path, branch_path):
     """Draws a grid with a path."""
 

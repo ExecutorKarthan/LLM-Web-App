@@ -1,5 +1,3 @@
-import turtle
-
 def draw_grid(size, box_size, path):
     """Draws a grid with a path."""
 

@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import puzzle1Img from "../assets/puzzle-images/puzzle1.png";
+
+interface Puzzle {
+  id: number;
+  code: string;
+  image_url: string;
+}
 
 interface SkulptDisplayProps {
   code: string;
@@ -43,17 +48,38 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code, onCodeChange }) => 
   const canvasRef = useRef<HTMLDivElement>(null);
   const [outputText, setOutputText] = useState<string>("");
   const [showPuzzle, setShowPuzzle] = useState<boolean>(false);
+  const [puzzleData, setPuzzleData] = useState<Puzzle[]>([]);
+  const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle | null>(null);
+  const [skulptLoaded, setSkulptLoaded] = useState(false);
 
   useEffect(() => {
+    fetch(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/")
+      .then((res) => res.json())
+      .then((data) => setPuzzleData(data))
+      .catch((err) => console.error("Failed to load puzzles", err));
+
     if (!window.Sk) {
-      const skulptScript = document.createElement("script");
-      skulptScript.src = "https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt.min.js";
-      skulptScript.onload = () => {
-        const stdlibScript = document.createElement("script");
-        stdlibScript.src = "https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt-stdlib.js";
-        document.body.appendChild(stdlibScript);
-      };
-      document.body.appendChild(skulptScript);
+      const loadScript = (src: string) =>
+        new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+          document.body.appendChild(script);
+        });
+
+      (async () => {
+        try {
+          await loadScript("https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt.min.js");
+          await loadScript("https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt-stdlib.js");
+          setSkulptLoaded(true);
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    } else {
+      setSkulptLoaded(true);
     }
   }, []);
 
@@ -69,12 +95,11 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code, onCodeChange }) => 
   };
 
   const runCode = () => {
-    if (!window.Sk) {
-      alert("Skulpt is not loaded yet. Try again in a moment.");
+    if (!skulptLoaded || !window.Sk || !window.Sk.builtinFiles) {
+      alert("Skulpt is not fully loaded yet. Try again in a moment.");
       return;
     }
 
-    // Hide puzzle when running code
     setShowPuzzle(false);
     setOutputText("");
 
@@ -82,67 +107,68 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code, onCodeChange }) => 
       canvasRef.current.innerHTML = "";
     }
 
-    const width = canvasRef.current?.clientWidth ?? 600;
-    const height = canvasRef.current?.clientHeight ?? 600;
+    setTimeout(() => {
+      const width = canvasRef.current?.clientWidth ?? 600;
+      const height = canvasRef.current?.clientHeight ?? 600;
 
-    window.Sk.configure({
-      output: outf,
-      read: builtinRead,
-    });
+      window.Sk.configure({
+        output: outf,
+        read: builtinRead,
+      });
 
-    window.Sk.TurtleGraphics = {
-      target: canvasRef.current,
-      width,
-      height,
-    };
+      window.Sk.TurtleGraphics = {
+        target: canvasRef.current,
+        width,
+        height,
+      };
 
-    const injectedPreamble = `
+      const injectedPreamble = `
 import turtle
 screen = turtle.Screen()
 screen.setup(width=${width}, height=${height})
 screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}, ${Math.floor(width / 2)}, ${Math.floor(height / 2)})
 `;
 
-    const combinedCode = injectedPreamble + "\n" + code;
+      const combinedCode = injectedPreamble + "\n" + code;
 
-    window.Sk.misceval
-      .asyncToPromise(() =>
-        window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
-      )
-      .then(
-        () => console.log("Execution success"),
-        (err: unknown) => {
-          let errorMessage = "Unknown error";
-          if (err instanceof Error) {
-            errorMessage = err.message;
-            console.error(err.message);
-          } else if (typeof err === "string") {
-            errorMessage = err;
-            console.error(err);
+      console.log("Here is the combined code:\n" + combinedCode);
+
+      window.Sk.misceval
+        .asyncToPromise(() =>
+          window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
+        )
+        .then(
+          () => console.log("Execution success"),
+          (err: unknown) => {
+            let errorMessage = "Unknown error";
+            console.error("Raw error object:", err);
+            if (err instanceof Error) {
+              errorMessage = err.message;
+            } else if (typeof err === "string") {
+              errorMessage = err;
+            }
+
+            setOutputText(
+              (prev) =>
+                prev +
+                "<br><strong style='color:red'>Error: </strong>" +
+                errorMessage
+            );
           }
-
-          setOutputText(
-            (prev) =>
-              prev +
-              "<br><strong style='color:red'>Error: </strong>" +
-              errorMessage
-          );
-        }
-      );
+        );
+    }, 100);
   };
 
- const handleShowPuzzle = async () => {
-  try {
-    const res = await fetch(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/1/");
-    if (!res.ok) throw new Error("Failed to load puzzle code");
-    const data = await res.json();
-    onCodeChange?.(data.code);
-    setShowPuzzle(true);
-  } catch (err) {
-    console.error("Failed to load puzzle from backend:", err);
-  }
-};
-
+  const handleShowPuzzle = (id: number) => {
+    const puzzle = puzzleData.find((p) => p.id === id);
+    if (puzzle) {
+      setSelectedPuzzle(puzzle);
+      setShowPuzzle(true);
+      if (onCodeChange) {
+        onCodeChange(puzzle.code);
+      }
+    }
+  };
 
   return (
     <div
@@ -154,15 +180,21 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
         boxSizing: "border-box",
       }}
     >
-      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
-        <button onClick={runCode}>Run Code</button>
-        <button onClick={handleShowPuzzle}>Show Puzzle</button>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <button onClick={runCode} disabled={!skulptLoaded}>
+          Run Code
+        </button>
+        {puzzleData.map((puzzle) => (
+          <button key={puzzle.id} onClick={() => handleShowPuzzle(puzzle.id)}>
+            Show Puzzle {puzzle.id}
+          </button>
+        ))}
       </div>
 
-      {showPuzzle ? (
+      {showPuzzle && selectedPuzzle ? (
         <img
-          src={puzzle1Img}
-          alt="Puzzle"
+          src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
+          alt={`Puzzle ${selectedPuzzle.id}`}
           style={{
             marginTop: 20,
             maxWidth: "100%",
