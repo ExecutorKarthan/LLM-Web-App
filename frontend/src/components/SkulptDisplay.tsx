@@ -1,7 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 
+interface Puzzle {
+  id: number;
+  code: string;
+  image_url: string;
+}
+
 interface SkulptDisplayProps {
   code: string;
+  onCodeChange?: (newCode: string) => void;
 }
 
 declare global {
@@ -17,7 +24,7 @@ interface Skulpt {
     dumpGlobals: boolean,
     body: string,
     canSuspend: boolean
-  ) => SkulptExecutionResult;
+  ) => Promise<void>;
   misceval: {
     asyncToPromise: <T>(fn: () => T | Promise<T>) => Promise<T>;
   };
@@ -36,29 +43,45 @@ interface SkulptConfigureOptions {
   read?: (filename: string) => string;
 }
 
-type SkulptExecutionResult = Promise<void>;
-
-const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
+const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code, onCodeChange }) => {
   const outputRef = useRef<HTMLPreElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [outputText, setOutputText] = useState<string>("");
+  const [showPuzzle, setShowPuzzle] = useState<boolean>(false);
+  const [puzzleData, setPuzzleData] = useState<Puzzle[]>([]);
+  const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle | null>(null);
+  const [skulptLoaded, setSkulptLoaded] = useState(false);
 
   useEffect(() => {
+    fetch(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/")
+      .then((res) => res.json())
+      .then((data) => setPuzzleData(data))
+      .catch((err) => console.error("Failed to load puzzles", err));
+
     if (!window.Sk) {
-      const skulptScript = document.createElement("script");
-      skulptScript.src = "https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt.min.js";
-      skulptScript.onload = () => {
-        const stdlibScript = document.createElement("script");
-        stdlibScript.src = "https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt-stdlib.js";
-        document.body.appendChild(stdlibScript);
-      };
-      document.body.appendChild(skulptScript);
+      const loadScript = (src: string) =>
+        new Promise<void>((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+          document.body.appendChild(script);
+        });
+
+      (async () => {
+        try {
+          await loadScript("https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt.min.js");
+          await loadScript("https://cdn.jsdelivr.net/npm/skulpt/dist/skulpt-stdlib.js");
+          setSkulptLoaded(true);
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    } else {
+      setSkulptLoaded(true);
     }
   }, []);
-
-  const outf = (text: string) => {
-    setOutputText((prev) => prev + text);
-  };
 
   const builtinRead = (x: string) => {
     if (!window.Sk.builtinFiles || !window.Sk.builtinFiles["files"][x]) {
@@ -67,71 +90,85 @@ const SkulptDisplay: React.FC<SkulptDisplayProps> = ({ code }) => {
     return window.Sk.builtinFiles["files"][x];
   };
 
+  const outf = (text: string) => {
+    setOutputText((prev) => prev + text);
+  };
+
   const runCode = () => {
-    if (!window.Sk) {
-      alert("Skulpt is not loaded yet. Try again in a moment.");
+    if (!skulptLoaded || !window.Sk || !window.Sk.builtinFiles) {
+      alert("Skulpt is not fully loaded yet. Try again in a moment.");
       return;
     }
 
+    setShowPuzzle(false);
     setOutputText("");
-    if (canvasRef.current) canvasRef.current.innerHTML = "";
 
-    const width = canvasRef.current?.clientWidth ?? 600;
-    const height = canvasRef.current?.clientHeight ?? 600;
+    if (canvasRef.current) {
+      canvasRef.current.innerHTML = "";
+    }
 
-    window.Sk.configure({
-      output: outf,
-      read: builtinRead,
-    });
+    setTimeout(() => {
+      const width = canvasRef.current?.clientWidth ?? 600;
+      const height = canvasRef.current?.clientHeight ?? 600;
 
-    window.Sk.TurtleGraphics = {
-      target: canvasRef.current,
-      width,
-      height,
-    };
+      window.Sk.configure({
+        output: outf,
+        read: builtinRead,
+      });
 
-    // Inject preamble to setup turtle screen with canvas size and centered coords
-    const injectedPreamble = `
+      window.Sk.TurtleGraphics = {
+        target: canvasRef.current,
+        width,
+        height,
+      };
+
+      const injectedPreamble = `
 import turtle
 screen = turtle.Screen()
 screen.setup(width=${width}, height=${height})
 screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}, ${Math.floor(width / 2)}, ${Math.floor(height / 2)})
-
-# Warning: User code has been modified to fit drawing inside the display.
-# This was done to center graphics and prevent drawings larger than the canvas.
 `;
 
-    const combinedCode = injectedPreamble + "\n" + code;
+      const combinedCode = injectedPreamble + "\n" + code;
 
-    window.Sk.misceval
-      .asyncToPromise(() =>
-        window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
-      )
-      .then(
-        () => console.log("Execution success"),
-        (err: unknown) => {
-          let errorMessage = "Unknown error";
-          if (err instanceof Error) {
-            errorMessage = err.message;
-            console.error(err.message);
-          } else if (typeof err === "string") {
-            errorMessage = err;
-            console.error(err);
+      console.log("Here is the combined code:\n" + combinedCode);
+
+      window.Sk.misceval
+        .asyncToPromise(() =>
+          window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
+        )
+        .then(
+          () => console.log("Execution success"),
+          (err: unknown) => {
+            let errorMessage = "Unknown error";
+            console.error("Raw error object:", err);
+            if (err instanceof Error) {
+              errorMessage = err.message;
+            } else if (typeof err === "string") {
+              errorMessage = err;
+            }
+
+            setOutputText(
+              (prev) =>
+                prev +
+                "<br><strong style='color:red'>Error: </strong>" +
+                errorMessage
+            );
           }
-
-          setOutputText(
-            (prev) =>
-              prev +
-              "<br><strong style='color:red'>Error: </strong>" +
-              errorMessage
-          );
-        }
-      );
+        );
+    }, 100);
   };
 
-  // Check if canvas has children to show graphic output
-  const hasGraphicOutput = canvasRef.current?.children.length !== 0;
-  const hasTextOutput = outputText.trim().length > 0;
+  const handleShowPuzzle = (id: number) => {
+    const puzzle = puzzleData.find((p) => p.id === id);
+    if (puzzle) {
+      setSelectedPuzzle(puzzle);
+      setShowPuzzle(true);
+      if (onCodeChange) {
+        onCodeChange(puzzle.code);
+      }
+    }
+  };
 
   return (
     <div
@@ -143,59 +180,58 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
         boxSizing: "border-box",
       }}
     >
-      <button
-        onClick={runCode}
-        style={{ padding: "10px", alignSelf: "center" }}
-      >
-        Run Code
-      </button>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+        <button onClick={runCode} disabled={!skulptLoaded}>
+          Run Code
+        </button>
+        {puzzleData.map((puzzle) => (
+          <button key={puzzle.id} onClick={() => handleShowPuzzle(puzzle.id)}>
+            Show Puzzle {puzzle.id}
+          </button>
+        ))}
+      </div>
 
-      {hasGraphicOutput && (
-        <div
-          ref={canvasRef}
+      {showPuzzle && selectedPuzzle ? (
+        <img
+          src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
+          alt={`Puzzle ${selectedPuzzle.id}`}
           style={{
-            flexGrow: 1,
-            minHeight: 200,
-            border: "1px solid black",
-            backgroundColor: "white",
-            marginTop: 16,
-            width: "100%",
-            maxHeight: 600,
+            marginTop: 20,
+            maxWidth: "100%",
+            height: "auto",
+            border: "1px solid #ccc",
           }}
         />
-      )}
-
-      {hasTextOutput && (
-        <pre
-          ref={outputRef}
-          style={{
-            backgroundColor: "#f0f0f0",
-            padding: "10px",
-            minHeight: 100,
-            maxHeight: 200,
-            overflowY: "auto",
-            whiteSpace: "pre-wrap",
-            marginTop: hasGraphicOutput ? 16 : 20,
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-          dangerouslySetInnerHTML={{ __html: outputText }}
-        />
-      )}
-
-      {!hasGraphicOutput && !hasTextOutput && (
-        <div
-          ref={canvasRef}
-          style={{
-            width: "100%",
-            minHeight: 200,
-            border: "1px solid black",
-            backgroundColor: "white",
-            marginTop: 16,
-            flexGrow: 1,
-            maxHeight: 600,
-          }}
-        />
+      ) : (
+        <>
+          <div
+            ref={canvasRef}
+            style={{
+              marginTop: 20,
+              minHeight: 200,
+              maxHeight: 600,
+              flexGrow: 1,
+              border: "1px solid black",
+              backgroundColor: "white",
+              width: "100%",
+            }}
+          />
+          <pre
+            ref={outputRef}
+            style={{
+              backgroundColor: "#f0f0f0",
+              padding: "10px",
+              minHeight: 100,
+              maxHeight: 200,
+              overflowY: "auto",
+              whiteSpace: "pre-wrap",
+              marginTop: 20,
+              width: "100%",
+              boxSizing: "border-box",
+            }}
+            dangerouslySetInnerHTML={{ __html: outputText }}
+          />
+        </>
       )}
     </div>
   );
