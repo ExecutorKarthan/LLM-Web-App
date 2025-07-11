@@ -3,22 +3,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from google import genai
 import traceback
-
-from django.http import JsonResponse, HttpResponseNotFound
-import os
-
 import os
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from django.http import JsonResponse
-from django.conf import settings
-import os
-
-from django.conf import settings
-from django.http import JsonResponse
-import os
+import time
+from google.genai.errors import ServerError
 
 def get_puzzles(request):
     code_dir = settings.BASE_DIR / "assets" / "puzzles"
@@ -54,38 +45,51 @@ def get_puzzles(request):
     return JsonResponse(puzzles, safe=False)
 
 @api_view(["POST"])
-def ask_gemini(request):
-    try:
-        prompt = request.data.get("prompt")
-        api_key = request.data.get("apiKey")
+def ask_gemini(request, max_retries=2, delay=2):
+    """
+    Attempts to get a response from Gemini models in priority order.
+    Tries each model with exponential backoff retry.
+    """
 
-        if not api_key:
-            return Response(
-                {"error": "API key is missing in request."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+    model_names = [
+        "gemini-2.0-flash",
+        "gemini-1.5-flash",
+        "gemini-pro"
+    ]
 
-        if not prompt:
-            return Response(
-                {"error": "Prompt is missing in request."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        client = genai.Client(api_key=api_key)
+    for model_name in model_names:
+        for attempt in range(max_retries):
+            try:
+                prompt = request.data.get("prompt")
+                api_key = request.data.get("apiKey")
 
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt
-        )
+                if not api_key:
+                    return Response(
+                    {"error": "API key is missing in request."},
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
 
-        message = response.text
-        return Response({"response": message}, status=status.HTTP_200_OK)
+                if not prompt:
+                    return Response(
+                    {"error": "Prompt is missing in request."},
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+                print(f"Trying model: {model_name} (Attempt {attempt + 1})")
+                client = genai.Client(api_key=api_key)
 
-    except Exception as e:
-        # Log full traceback to console
-        print("Error in ask_gemini view:")
-        traceback.print_exc()
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt
+                )
+                message = response.text
+                return Response({"response": message}, status=status.HTTP_200_OK)
+            except ServerError as e:
+                if "UNAVAILABLE" in str(e):
+                    print(f"Model {model_name} unavailable. Retrying after delay...")
+                    time.sleep(delay * (2 ** attempt))
+                else:
+                    raise  # re-raise unexpected server errors
+
+    # If we get here, all models failed
+    return "All Gemini models are currently unavailable. Please try again later."
+

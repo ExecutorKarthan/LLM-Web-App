@@ -1,36 +1,28 @@
-import React from "react";
-
-function processedResponse(response: string): React.ReactNode[] {
+function processedResponse(response: string): string {
   const lines = response.split("\n");
-  let indentLine = false;
 
-  return lines.map((value, index) => {
-    const trimmed = value.trim();
+  let inCodeBlock = false;
+  const filteredLines: string[] = [];
 
-    if (
-      (trimmed.startsWith("def") || trimmed.startsWith("if") || trimmed.startsWith("else")) &&
-      trimmed.endsWith(":")
-    ) {
-      indentLine = true;
-      return <p key={index}><strong>{value}</strong></p>;
+  for (let line of lines) {
+    const trimmed = line.trim();
+
+    // Start or stop collecting lines between triple backticks
+    if (trimmed.startsWith("```")) {
+      if (!inCodeBlock) {
+        inCodeBlock = true;
+      } else {
+        break; // Stop processing after the closing ```
+      }
+      continue;
     }
 
-    const leadingSpacesMatch = value.match(/^(\s*)/);
-    const leadingSpaces = leadingSpacesMatch ? leadingSpacesMatch[0].length : 0;
-
-    const paddingLeft = leadingSpaces * 5;
-
-    if (indentLine && leadingSpaces > 0) {
-      return (
-        <p key={index} style={{ paddingLeft: `${paddingLeft}px`, fontFamily: "monospace" }}>
-          {value}
-        </p>
-      );
+    if (inCodeBlock || !lines.some(l => l.trim().startsWith("```"))) {
+      filteredLines.push(line);
     }
+  }
 
-    indentLine = false;
-    return <p key={index} style={{ fontFamily: "monospace" }}>{value}</p>;
-  });
+  return filteredLines.join("\n");
 }
 
 export default processedResponse;
