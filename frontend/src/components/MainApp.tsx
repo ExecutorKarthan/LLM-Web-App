@@ -145,6 +145,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
           }}
         >
           <PythonEditor code={writtenCode} onChange={updateCode} />
+          {/* Puzzle image below editor */}
           {selectedPuzzle && (
             <img
               src={selectedPuzzle.image_url}
