@@ -5,7 +5,7 @@ import { Button } from "antd";
 interface LLMResponseProps {
   response: string;
   loading: boolean;
-  onSaveCode: (code: string) => void;
+  onSaveCode: (processResocode: string) => void;
 }
 
 const LLMResponseBox: React.FC<LLMResponseProps> = ({
@@ -39,7 +39,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
             justifyContent: "center",
           }}
         >
-          <Button onClick={() => onSaveCode(response)}>Save to Editor</Button>
+          <Button onClick={() => onSaveCode(processResponse(response))}>Save to Editor</Button>
         </div>
       )}
     </div>

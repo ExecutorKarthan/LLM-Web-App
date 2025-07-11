@@ -131,8 +131,6 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
 
       const combinedCode = injectedPreamble + "\n" + code;
 
-      console.log("Here is the combined code:\n" + combinedCode);
-
       window.Sk.misceval
         .asyncToPromise(() =>
           window.Sk.importMainWithBody("<stdin>", false, combinedCode, true)
