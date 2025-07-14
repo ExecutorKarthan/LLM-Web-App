@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 interface Puzzle {
-  id: number;
+  id: string;
   code: string;
   image_url: string;
 }
@@ -157,8 +157,31 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
     }, 100);
   };
 
-  const handleShowPuzzle = (id: number) => {
-    const puzzle = puzzleData.find((p) => p.id === id);
+  const handleShowPuzzle = (label: string, id: string) => {
+    let puzzle;
+    let processedId: string = id; 
+    let count: number = 0;
+    while(processedId.indexOf(" ") > 0 && count < 5){
+      processedId = processedId.substring(0, processedId.indexOf(" ")) + processedId.substring(processedId.indexOf(" ") +1)
+      count+= 1
+    }
+    console.log(puzzleData)
+    console.log("Here is the processedId " + processedId)
+    console.log("Here is the label: " + label)  
+    console.log("Id being looked for: " + label.toLowerCase()+processedId.toLocaleLowerCase())  
+    for( let i = 0; i < puzzleData.length; i++){ 
+
+      console.log("Puzzle Data ID: " + puzzleData[i].id)
+      if(puzzleData[i].id.toLowerCase().indexOf(label.toLowerCase()+processedId.toLocaleLowerCase()) > -1 
+          && puzzleData[i].id.length == (label + processedId).length){
+        puzzle = puzzleData[i];
+        break
+      }
+      else{
+        console.log("Puzzle not found.")
+      }
+    }
+    console.log(puzzle)
     if (puzzle) {
       setSelectedPuzzle(puzzle);
       setShowPuzzle(true);
@@ -169,68 +192,78 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
   };
 
   return (
-    <div
-      style={{
-        marginTop: "20px",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        boxSizing: "border-box",
-      }}
-    >
-      <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-        <button onClick={runCode} disabled={!skulptLoaded}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+      {/* Run Code Button */}
+      <div style={{ marginBottom: 20 }}>
+        <button onClick={runCode} disabled={!skulptLoaded} style={{ fontSize: "1.2rem", padding: "10px 20px" }}>
           Run Code
         </button>
-        {puzzleData.map((puzzle) => (
-          <button key={puzzle.id} onClick={() => handleShowPuzzle(puzzle.id)}>
-            Show Puzzle {puzzle.id}
-          </button>
+      </div>
+
+      {/* Puzzle Categories */}
+      <div style={{ display: "flex", justifyContent: "space-around", width: "100%", maxWidth: 800 }}>
+        {[
+          { label: "Small", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Medium", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Large", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Solved", ids: ["Linear", "One Branch", "One Branch Gate"] },
+        ].map(({ label, ids }) => (
+          <div key={label} style={{ textAlign: "center" }}>
+            <h3>{label}</h3>
+            {ids.map((id) => (
+              <button key={id} style={{ display: "block", margin: "6px auto" }} onClick={() => handleShowPuzzle(label, id)}>
+                {id} Puzzle
+              </button>
+            ))}
+          </div>
         ))}
       </div>
 
-      {showPuzzle && selectedPuzzle ? (
-        <img
-          src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
-          alt={`Puzzle ${selectedPuzzle.id}`}
-          style={{
-            marginTop: 20,
-            maxWidth: "100%",
-            height: "auto",
-            border: "1px solid #ccc",
-          }}
-        />
-      ) : (
-        <>
-          <div
-            ref={canvasRef}
+      {/* Skulpt Canvas or Puzzle Image */}
+      <div style={{ marginTop: 20, width: "100%" }}>
+        {showPuzzle && selectedPuzzle ? (
+          <img
+            src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
+            alt={`Puzzle ${selectedPuzzle.id}`}
             style={{
               marginTop: 20,
-              minHeight: 200,
-              maxHeight: 600,
-              flexGrow: 1,
-              border: "1px solid black",
-              backgroundColor: "white",
-              width: "100%",
+              maxWidth: "100%",
+              height: "auto",
+              border: "1px solid #ccc",
             }}
           />
-          <pre
-            ref={outputRef}
-            style={{
-              backgroundColor: "#f0f0f0",
-              padding: "10px",
-              minHeight: 100,
-              maxHeight: 200,
-              overflowY: "auto",
-              whiteSpace: "pre-wrap",
-              marginTop: 20,
-              width: "100%",
-              boxSizing: "border-box",
-            }}
-            dangerouslySetInnerHTML={{ __html: outputText }}
-          />
-        </>
-      )}
+        ) : (
+          <>
+            <div
+              ref={canvasRef}
+              style={{
+                marginTop: 20,
+                minHeight: 200,
+                maxHeight: 600,
+                flexGrow: 1,
+                border: "1px solid black",
+                backgroundColor: "white",
+                width: "100%",
+              }}
+            />
+            <pre
+              ref={outputRef}
+              style={{
+                backgroundColor: "#f0f0f0",
+                padding: "10px",
+                minHeight: 100,
+                maxHeight: 200,
+                overflowY: "auto",
+                whiteSpace: "pre-wrap",
+                marginTop: 20,
+                width: "100%",
+                boxSizing: "border-box",
+              }}
+              dangerouslySetInnerHTML={{ __html: outputText }}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };
