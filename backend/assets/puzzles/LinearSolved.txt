@@ -1,0 +1,74 @@
+def draw_grid(size, box_size, path):
+    """Draws a grid with a path."""
+
+    screen = turtle.Screen()
+    screen.setup(width=size * box_size + 50, height=size * box_size + 50)
+    screen.bgcolor("white")
+    turtle_instance = turtle.Turtle()
+    turtle_instance.speed(0)  # Fastest speed
+    turtle_instance.hideturtle()
+    turtle_instance.penup()
+
+    for row in range(size):
+        for col in range(size):
+            x = (col - size // 2) * box_size
+            y = (size // 2 - row) * box_size
+            turtle_instance.goto(x, y)
+            turtle_instance.pendown()
+
+            # Determine color based on location and path
+            if (row, col) == (0, 0):
+                color = "green"  # Top-left corner
+            elif (row, col) == (size-1, size-1):
+                 color = "gold" # Bottom right corner
+            elif (row, col) in path:
+                color = "white"  # Path color
+            else:
+                color = "blue"  # Default color
+
+            turtle_instance.fillcolor(color)
+            turtle_instance.begin_fill()
+            for _ in range(4):
+                turtle_instance.forward(box_size)
+                turtle_instance.left(90)
+            turtle_instance.end_fill()
+            turtle_instance.penup()
+
+def move_turtle_along_path(path, box_size, grid_size):
+    """Moves a visible turtle along the specified path."""
+    player_turtle = turtle.Turtle()
+    player_turtle.shape("turtle")
+    player_turtle.color("purple")
+    player_turtle.penup()
+    player_turtle.speed(1) # Set speed to a reasonable value
+
+    start_row, start_col = 0, 0
+    x = (start_col - grid_size // 2) * box_size + box_size//2 
+    y = (grid_size // 2 - start_row) * box_size + box_size//2
+
+    player_turtle.goto(x, y)
+    player_turtle.pendown()
+
+    for i in range(0, len(path)):
+        curr_row, curr_col = path[i]
+        if(i+1 < len(path)):
+            tar_row, tar_col = path[i+1]
+        if((tar_row - curr_row) > 0):
+            y = y - box_size
+        if((tar_col - curr_col) > 0):
+            x = x + box_size
+        player_turtle.goto(x, y)
+
+
+
+grid_size = 20
+box_size = 20
+
+# Generate a random path
+path = [(0, 0), (1, 0), (2, 0), (2, 1), (2, 2), (3, 2), (4, 2), (4, 3), (4, 4), (5, 4), (6, 4), (7, 4), (7, 5), (7, 6), (7, 7), (8, 7), (8, 8), (8, 9), (9, 9), (9, 10), (10, 10), (11, 10), (11, 11), (12, 11), (13, 11), (13, 12), (13, 13), (14, 13), (15, 13), (15, 14), (15, 15), (15, 16), (16, 16), (17, 16), (17, 17), (17, 18), (17, 19), (18, 19), (19, 19)]
+
+# Draw the grid with the path
+draw_grid(grid_size, box_size, path)
+move_turtle_along_path(path, box_size, grid_size)
+
+turtle.done()

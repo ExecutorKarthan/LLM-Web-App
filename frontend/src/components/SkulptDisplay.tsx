@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 interface Puzzle {
-  id: number;
+  id: string;
   code: string;
   image_url: string;
 }
@@ -157,10 +157,27 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
     }, 100);
   };
 
-  const handleShowPuzzle = (id: number) => {
-    console.log(id + `clicked`)
-    console.log(puzzleData)
-    const puzzle = puzzleData[id-1];
+  const handleShowPuzzle = (label: string, id: string) => {
+    let puzzle;
+    let processedId: string = id; 
+    let count: number = 0;
+    while(processedId.indexOf(" ") > 0 && count < 5){
+      processedId = processedId.substring(0, processedId.indexOf(" ")) + processedId.substring(processedId.indexOf(" ") +1)
+      count+= 1
+    }
+    console.log("Here is the processedId " + processedId)
+    console.log("Here is the label: " + label)    
+    console.log(label.toLowerCase()+processedId.toLocaleLowerCase())
+    for( let i = 0; i < puzzleData.length; i++){ 
+      console.log(puzzleData[i].id)
+      if(puzzleData[i].id.toLowerCase().indexOf(label.toLowerCase()+processedId.toLocaleLowerCase()) > -1 
+          && puzzleData[i].id.length == (label + processedId).length){
+        puzzle = puzzleData[i];
+      }
+      else{
+        console.log("Puzzle not found.")
+      }
+    }
     console.log(puzzle)
     if (puzzle) {
       setSelectedPuzzle(puzzle);
@@ -183,15 +200,16 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
       {/* Puzzle Categories */}
       <div style={{ display: "flex", justifyContent: "space-around", width: "100%", maxWidth: 800 }}>
         {[
-          { label: "Small", ids: [1, 2] },
-          { label: "Medium", ids: [4, 5] },
-          { label: "Large", ids: [7, 8] },
+          { label: "Small", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Medium", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Large", ids: ["Linear", "One Branch", "One Branch Gate"] },
+          { label: "Solved", ids: ["Linear", "One Branch", "One Branch Gate"] },
         ].map(({ label, ids }) => (
           <div key={label} style={{ textAlign: "center" }}>
             <h3>{label}</h3>
             {ids.map((id) => (
-              <button key={id} style={{ display: "block", margin: "6px auto" }} onClick={() => handleShowPuzzle(id)}>
-                Puzzle {id}
+              <button key={id} style={{ display: "block", margin: "6px auto" }} onClick={() => handleShowPuzzle(label, id)}>
+                {id} Puzzle
               </button>
             ))}
           </div>
