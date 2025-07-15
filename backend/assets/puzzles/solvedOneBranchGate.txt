@@ -44,7 +44,7 @@ def draw_grid(size, box_size, path, branch_path):
 def navigate_path(turtle_instance, grid_size, box_size, path, branch_path):
     """Navigates the turtle along the combined path to the gold square."""
 
-    turtle_instance.speed(3)  # adjust turtle speed. 1 is slowest, 10 is fastest. 0 is fastest with no animation
+    turtle_instance.speed(1)  # adjust turtle speed. 1 is slowest, 10 is fastest. 0 is fastest with no animation
     turtle_instance.shape("turtle")  # Set turtle shape
     turtle_instance.color("black")
     turtle_instance.penup()

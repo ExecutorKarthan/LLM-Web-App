@@ -165,23 +165,13 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
       processedId = processedId.substring(0, processedId.indexOf(" ")) + processedId.substring(processedId.indexOf(" ") +1)
       count+= 1
     }
-    console.log(puzzleData)
-    console.log("Here is the processedId " + processedId)
-    console.log("Here is the label: " + label)  
-    console.log("Id being looked for: " + label.toLowerCase()+processedId.toLocaleLowerCase())  
     for( let i = 0; i < puzzleData.length; i++){ 
-
-      console.log("Puzzle Data ID: " + puzzleData[i].id)
       if(puzzleData[i].id.toLowerCase().indexOf(label.toLowerCase()+processedId.toLocaleLowerCase()) > -1 
           && puzzleData[i].id.length == (label + processedId).length){
         puzzle = puzzleData[i];
         break
       }
-      else{
-        console.log("Puzzle not found.")
-      }
     }
-    console.log(puzzle)
     if (puzzle) {
       setSelectedPuzzle(puzzle);
       setShowPuzzle(true);

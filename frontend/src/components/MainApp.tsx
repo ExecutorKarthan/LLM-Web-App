@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios"; // Make sure axios is installed and imported
+import axios from "axios";
 import LLMEntryBox from "./LLMEntryBox";
 import LLMResponseBox from "./LLMResponseBox";
 import PythonEditor from "./PythonEditor";
@@ -23,13 +23,13 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
     `# Type your code here! Like this:\nprint("You can do this!")\n`
   );
   const [response, setResponse] = useState<string>("");
+  const [error, setError] = useState<string>(""); // ✅ NEW
   const [loading, setLoading] = useState<boolean>(false);
 
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle | null>(null);
 
   useEffect(() => {
-    // Fetch puzzle list on mount
     axios
       .get(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/")
       .then((res) => {
@@ -44,20 +44,23 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
     if (!userQuery.trim()) return;
     setLoading(true);
     setResponse("");
+    setError(""); // ✅ clear any previous error
+
     try {
       const res = await axios.post(import.meta.env.VITE_BACKEND_URL + "/api/ask/", {
         prompt: userQuery,
         apiKey: userApiKey,
       });
       setResponse(res.data.response);
-    } catch (error) {
-      setResponse("Error processing your request.");
+    } catch (err: any) {
+      const backendError = err?.response?.data?.error || "Unexpected error occurred.";
+      setError(backendError);          // ✅ store error separately
+      setResponse(backendError);       // ✅ still populate for display
     } finally {
       setLoading(false);
     }
   };
 
-  // When a puzzle button is clicked
   const handlePuzzleClick = (puzzleId: number) => {
     axios
       .get(`${import.meta.env.VITE_BACKEND_URL}/api/puzzles/${puzzleId}/`)
@@ -73,7 +76,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
 
   return (
     <>
-    {/* LLM input/output */}
+      {/* LLM input/output */}
       <Row gutter={[24, 24]} justify="center" wrap style={{ marginBottom: 32 }}>
         <Col
           xs={24}
@@ -121,6 +124,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
           <LLMResponseBox
             response={response}
             loading={loading}
+            error={error} // ✅ passed to child
             onSaveCode={(code) => updateCode(code)}
           />
         </Col>
@@ -145,7 +149,6 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
           }}
         >
           <PythonEditor code={writtenCode} onChange={updateCode} />
-          {/* Puzzle image below editor */}
           {selectedPuzzle && (
             <img
               src={selectedPuzzle.image_url}
