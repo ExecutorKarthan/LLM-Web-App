@@ -52,9 +52,12 @@ def ask_gemini(request, max_retries=2, delay=2):
     """
 
     model_names = [
+        "gemini-2.5-pro",
+        "gemini-2.5-flash",
         "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-pro"
+        "gemini-2.0-flash-lite",
+        "gemini-1.5-pro",
+        "gemini-1.5-flash"
     ]
 
     for model_name in model_names:
