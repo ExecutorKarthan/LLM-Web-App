@@ -23,9 +23,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
-    '*'
-    # "llm-web-app-backend.onrender.com",
-    # "localhost"                 
+    "llm-web-app-backend.onrender.com",
+    "localhost"                 
 ]
 
 
@@ -44,7 +43,6 @@ INSTALLED_APPS = [
 
 # Define programs to handle interactions
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -53,14 +51,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 # Allow CORS to operate depending on origins
-CORS_ALLOW_ALL_ORIGINS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "https://llm-web-app-4970.onrender.com",
-#     "http://localhost:5173"
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://llm-web-app-4970.onrender.com",
+    "http://localhost:5173"
+]
 
 
 # Defines locations for URL routs and how to render HTML
@@ -121,9 +119,23 @@ application = get_asgi_application()
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Define security settings
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# X_FRAME_OPTIONS = 'DENY'
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
+# Set Logging for server
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG",
+    },
+}
