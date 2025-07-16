@@ -1,16 +1,9 @@
-"""
-ASGI config for backend_project project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
-"""
-
+# Import needed modules
 import os
-
 from django.core.asgi import get_asgi_application
 
+# Set environment variable for ASGI entry
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend_project.settings')
 
+# Create AGSI application
 application = get_asgi_application()
