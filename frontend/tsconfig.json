@@ -1,3 +1,4 @@
+// Defines compile options for Typescript
 {
   "compilerOptions": {
     "target": "ES2020",
