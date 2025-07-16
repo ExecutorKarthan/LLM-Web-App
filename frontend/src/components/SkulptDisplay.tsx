@@ -198,10 +198,12 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       <div style={{ marginBottom: 20 }}>
+        {/* Create a button to run the code */}
         <button onClick={runCode} disabled={!skulptLoaded} style={{ fontSize: "1.2rem", padding: "10px 20px" }}>
           Run Code
         </button>
       </div>
+      {/* Create buttons that will categorize and list the different types of puzzles */}
       <div style={{ display: "flex", justifyContent: "space-around", width: "100%", maxWidth: 800 }}>
         {[
           { label: "Small", ids: ["Linear", "One Branch", "One Branch Gate"] },
@@ -220,6 +222,7 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
         ))}
       </div>
       <div style={{ marginTop: 20, width: "100%" }}>
+        {/* Dsiplay the image of the puzzle when its button is clicked */}
         {showPuzzle && selectedPuzzle ? (
           <img
             src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
