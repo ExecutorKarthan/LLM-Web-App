@@ -23,7 +23,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
-    "https://llm-web-app-backend.onrender.com",
+    "llm-web-app-backend.onrender.com",
     "localhost"                 
 ]
 
