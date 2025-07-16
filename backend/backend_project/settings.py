@@ -23,8 +23,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
-    "llm-web-app-backend.onrender.com",
-    "localhost"                 
+    "*"
+    # "llm-web-app-backend.onrender.com",
+    # "localhost"                 
 ]
 
 
@@ -120,9 +121,9 @@ application = get_asgi_application()
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Define security settings
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# X_FRAME_OPTIONS = 'DENY'
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
 
