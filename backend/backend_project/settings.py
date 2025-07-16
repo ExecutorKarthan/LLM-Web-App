@@ -55,11 +55,11 @@ MIDDLEWARE = [
 ]
 
 # Allow CORS to operate depending on origins
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    "https://llm-web-app-4970.onrender.com",
-    "http://localhost:5173"
-]
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://llm-web-app-4970.onrender.com",
+#     "http://localhost:5173"
+# ]
 
 
 # Defines locations for URL routs and how to render HTML
