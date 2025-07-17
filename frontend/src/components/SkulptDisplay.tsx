@@ -240,7 +240,7 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
               ref={canvasRef}
               style={{
                 marginTop: 20,
-                minHeight: 200,
+                minHeight: 600,
                 maxHeight: 600,
                 flexGrow: 1,
                 border: "1px solid black",

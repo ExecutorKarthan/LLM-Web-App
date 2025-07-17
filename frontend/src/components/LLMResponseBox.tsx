@@ -1,7 +1,9 @@
+// Import needed modules
 import React from "react";
 import processResponse from "../utils/responseProcessor";
 import { Button } from "antd";
 
+// Create an interface for type safety
 interface LLMResponseProps {
   response: string;
   loading: boolean;
@@ -9,6 +11,7 @@ interface LLMResponseProps {
   onSaveCode: (processedCode: string) => void;
 }
 
+// Create a box to display information about the LLM response
 const LLMResponseBox: React.FC<LLMResponseProps> = ({
   response,
   loading,
@@ -22,6 +25,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     return processResponse(response);
   };
 
+  // Return HTML for rendering
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div
@@ -38,9 +42,10 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
           border: "1px solid #ccc",
         }}
       >
+        {/* Populate the response box with the response from the LLM */}
         {displayContent()}
       </div>
-
+      {/* If there is a response, display the save to editor button */}
       {response && !loading && !error && (
         <div
           style={{
@@ -49,6 +54,7 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
             justifyContent: "center",
           }}
         >
+          {/* Create a button to transfer the code to the editor */}
           <Button onClick={() => onSaveCode(processResponse(response))}>
             Save to Editor
           </Button>
@@ -58,4 +64,5 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
   );
 };
 
+// Export component for use
 export default LLMResponseBox;

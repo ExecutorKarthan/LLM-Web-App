@@ -1,10 +1,13 @@
+// Import needed modules
 import { Editor } from '@monaco-editor/react';
 
+// Establish interface for type safety
 interface PythonEditorProps {
   code: string;
   onChange: (newCode: string) => void;
 }
 
+// Create the editor and store it as a variable 
 const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
   const options = {
     selectOnLineNumbers: true,
@@ -13,6 +16,7 @@ const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
     automaticLayout: true,
   };
 
+  // Return the HTML for rendering
   return (
     <div style={{ height: "100%", width: "100%", boxSizing: "border-box" }}>
       <Editor
@@ -25,10 +29,11 @@ const PythonEditor: React.FC<PythonEditorProps> = ({ code, onChange }) => {
             onChange(newValue);
           }
         }}
-        height="100%" // now fills parent div
+        height="100%"
       />
     </div>
   );
 };
 
+// Export the editor for use
 export default PythonEditor;

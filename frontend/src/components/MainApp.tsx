@@ -1,11 +1,13 @@
+// Import needed modules
 import { useState, useEffect } from "react";
 import axios from "axios";
 import LLMEntryBox from "./LLMEntryBox";
 import LLMResponseBox from "./LLMResponseBox";
 import PythonEditor from "./PythonEditor";
 import SkulptDisplay from "./SkulptDisplay";
-import { Row, Col, Button } from "antd";
+import { Row, Col} from "antd";
 
+// Create interfaces for type safety
 interface Puzzle {
   id: number;
   title: string;
@@ -17,19 +19,22 @@ interface MainAppProps {
   userApiKey: string;
 }
 
+// Define main app
 const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
+  // Define constants for reference
   const [userQuery, updateQuery] = useState<string>("");
   const [writtenCode, updateCode] = useState<string>(
     `# Type your code here! Like this:\nprint("You can do this!")\n`
   );
   const [response, setResponse] = useState<string>("");
-  const [error, setError] = useState<string>(""); // ✅ NEW
+  const [error, setError] = useState<string>(""); 
   const [loading, setLoading] = useState<boolean>(false);
-
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [selectedPuzzle, setSelectedPuzzle] = useState<Puzzle | null>(null);
 
+  // Create a hook to load needed content as the main app loads
   useEffect(() => {
+    // Fetch the puzzle data from the backend server
     axios
       .get(import.meta.env.VITE_BACKEND_URL + "/api/puzzles/")
       .then((res) => {
@@ -40,40 +45,35 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
       });
   }, []);
 
+  // Define behavior for form submission
   const onSubmit = async () => {
+    // If there is no data in the query box, return nothing and end the process
     if (!userQuery.trim()) return;
+    // Set variable defaults if there is a query
     setLoading(true);
     setResponse("");
-    setError(""); // ✅ clear any previous error
-
+    setError(""); 
+    // Attempt to pass the query and API key to the backend for processing if submitted - wait for a response
     try {
       const res = await axios.post(import.meta.env.VITE_BACKEND_URL + "/api/ask/", {
         prompt: userQuery,
         apiKey: userApiKey,
       });
       setResponse(res.data.response);
-    } catch (err: any) {
+    } 
+    //If an error occurs, provide it to the user
+    catch (err: any) {
       const backendError = err?.response?.data?.error || "Unexpected error occurred.";
-      setError(backendError);          // ✅ store error separately
-      setResponse(backendError);       // ✅ still populate for display
-    } finally {
+      setError(backendError);        
+      setResponse(backendError);     
+    } 
+    // If there is no response yet, 
+    finally {
       setLoading(false);
     }
   };
 
-  const handlePuzzleClick = (puzzleId: number) => {
-    axios
-      .get(`${import.meta.env.VITE_BACKEND_URL}/api/puzzles/${puzzleId}/`)
-      .then((res) => {
-        const puzzle: Puzzle = res.data;
-        setSelectedPuzzle(puzzle);
-        updateCode(puzzle.code);
-      })
-      .catch((err) => {
-        console.error("Failed to load puzzle:", err);
-      });
-  };
-
+  // Return HTML code for rendering
   return (
     <>
       {/* LLM input/output */}
@@ -105,7 +105,6 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
             onSubmit={onSubmit}
           />
         </Col>
-
         <Col
           xs={24}
           sm={24}
@@ -129,7 +128,6 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
           />
         </Col>
       </Row>
-
       {/* Editor, puzzle image, and Skulpt display */}
       <Row gutter={[24, 24]} justify="center" wrap>
         <Col
@@ -157,7 +155,6 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
             />
           )}
         </Col>
-
         <Col
           xs={24}
           sm={24}
@@ -179,4 +176,5 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
   );
 };
 
+// Export component for use
 export default MainApp;
