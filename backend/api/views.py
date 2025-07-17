@@ -1,12 +1,15 @@
 # Imports needed modules
 import time
 import os
+import uuid, json
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from google import genai
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 from google.genai.errors import ClientError, ServerError
 
 # Function to retrieve image and code for each puzzle
@@ -50,9 +53,27 @@ def get_puzzles(request):
     # Pass the list of puzzle objects to the frontend in JSON format
     return JsonResponse(puzzles, safe=False)
 
+# Add a function to tokenize the API key for security reasons
+@csrf_exempt
+def tokenize_key(request):
+    # Check the method and if it is a post method, execute the code
+    if request.method == "POST":
+        try:
+            # Retrieve the data and get the api key
+            body = json.loads(request.body)
+            api_key = body.get("apiKey")
+            if not api_key:
+                return JsonResponse({ "error": "API key is required" }, status=400)
+            # Create a random token and save it in the cache
+            token = str(uuid.uuid4())
+            cache.set(token, api_key, timeout=3600)
+            return JsonResponse({ "token": token })
+        except Exception as e:
+            return JsonResponse({ "error": "Server error", "details": str(e) }, status=500)
+    return JsonResponse({ "error": "Invalid request method" }, status=405)
+
 # Restricts the view to only POST requests for asking the LLM
 @api_view(["POST"])
-
 # Create a function to handle  querying the LLM
 def ask_gemini(request, max_retries=2, delay=2):
     # Define a list of Gemini models to be used
@@ -63,26 +84,28 @@ def ask_gemini(request, max_retries=2, delay=2):
         "gemini-2.0-flash-lite",
         "gemini-1.5-pro",
         "gemini-1.5-flash"
-    ]
-
-    # Store the prompt and API key provided by the user
-    prompt = request.data.get("prompt")
-    api_key = request.data.get("apiKey")
-
-    # If there is no API key, throw a readable error
+    ]   
+    # Get token from header
+    token = request.headers.get("X-Token")
+    if not token:
+        return Response(
+            {"error": "Missing X-Token header."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+    # Lookup API key from cache
+    api_key = cache.get(token)
     if not api_key:
         return Response(
-            {"error": "API key is missing in request."},
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "Invalid or expired token."},
+            status=status.HTTP_403_FORBIDDEN
         )
-
-    # If there is no prompt, throw a readable error
+    # Get user prompt
+    prompt = request.data.get("prompt")
     if not prompt:
         return Response(
             {"error": "Prompt is missing in request."},
             status=status.HTTP_400_BAD_REQUEST
         )
-
     # Iterate through each model and attempt to query it. If that fails, reattempt and then move to the next model
     for model_name in model_names:
         for attempt in range(max_retries):
@@ -97,11 +120,9 @@ def ask_gemini(request, max_retries=2, delay=2):
                     model=model_name,
                     contents=prompt
                 )
-                message = response.text
-                
+                message = response.text     
                 #Return the response from the model
                 return Response({"response": message}, status=status.HTTP_200_OK)
-
             # Respond with an error if the LLM query failed due to an invalid API key
             except ClientError as e:
                 error_message = str(e)
@@ -114,7 +135,6 @@ def ask_gemini(request, max_retries=2, delay=2):
                     {"error": f"Client error: {error_message}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
             # Respond with an error if the LLM query failed due to the server. Retry after a delay
             except ServerError as e:
                 if "UNAVAILABLE" in str(e):
@@ -125,14 +145,12 @@ def ask_gemini(request, max_retries=2, delay=2):
                     {"error": f"Server error: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-
             # Respond with an error if the LLM query failed due to some other error
             except Exception as e:
                 return Response(
                     {"error": f"Unexpected error: {str(e)}"},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
-
     # Respond with an error if the LLM query failed and no model is available 
     return Response(
         {"error": "All Gemini models are currently unavailable. Please try again later."},

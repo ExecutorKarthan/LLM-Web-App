@@ -1,20 +1,22 @@
 // Import needed modules
 import { useState } from "react";
+import axios from "axios";
 
 // Create an interface for props for type enforcement
 interface SplashGateProps {
-  onUnlock: (apiKey: string) => void;
+  onUnlock: (token: string) => void;
 }
 
 // Create an initial page that will restrict people from accessing the app without accepting the terms or providing an API key
 const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
+  
   // Create constants and their mutators for reference
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
 
   // Generate behavior for the submission button
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Create logic that requires both terms agreement and an API key to proceed
     if (!agreed) {
       setError("You must agree to the terms.");
@@ -25,7 +27,23 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
       return;
     }
     // Store the entered key for use  assuming terms and key are met and exist
-    onUnlock(apiKey.trim());
+    try {
+      // Send the API key to the backend to be turned into a token
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`, {
+        apiKey: apiKey.trim(),
+      });
+      const token = response.data.token;
+      if (token) {
+        onUnlock(token); 
+      } else {
+        setError("Failed to receive token from server.");
+      }
+    } 
+    // Thrown an error if an issue occurs
+    catch (err) {
+      console.error(err);
+      setError("Failed to connect to the server.");
+  }
   };
 
   // Return the HTML for the browser to show
@@ -72,6 +90,8 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         <input
           type="text"
           value={apiKey}
+          aria-label="Gemini API Key"
+          placeholder="Paste your API key here"
           onChange={(e) => setApiKey(e.target.value)}
           style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
         />
