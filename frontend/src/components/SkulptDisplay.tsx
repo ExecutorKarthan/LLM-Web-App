@@ -224,15 +224,15 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
       <div style={{
         marginTop: 20,
         width: "100%",
-        minHeight: 600, // same as canvas
+        minHeight: 600,
         maxHeight: 600,
         display: "flex",
-        justifyContent: "center", // center horizontally
-        alignItems: "center",     // center vertically
-        border: "1px solid black", // ensure it matches the canvas border
-        backgroundColor: "white",  // ensure visual consistency
+        flexDirection: "column",  // stack vertically
+        justifyContent: "flex-start",
+        alignItems: "center",
+        border: "1px solid black",
+        backgroundColor: "white",
       }}>
-        {/* Dsiplay the image of the puzzle when its button is clicked */}
         {showPuzzle && selectedPuzzle ? (
           <img
             src={`${import.meta.env.VITE_BACKEND_URL}${selectedPuzzle.image_url}`}
@@ -246,33 +246,39 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
           />
         ) : (
           <>
-            <div
-              ref={canvasRef}
-              style={{
-                marginTop: 20,
-                minHeight: 600,
-                maxHeight: 600,
-                flexGrow: 1,
-                border: "1px solid black",
-                backgroundColor: "white",
-                width: "100%",
-              }}
-            />
-            <pre
-              ref={outputRef}
-              style={{
-                backgroundColor: "#f0f0f0",
-                padding: "10px",
-                minHeight: 100,
-                maxHeight: 200,
-                overflowY: "auto",
-                whiteSpace: "pre-wrap",
-                marginTop: 20,
-                width: "100%",
-                boxSizing: "border-box",
-              }}
-              dangerouslySetInnerHTML={{ __html: outputText }}
-            />
+            {/* Show canvas only if Skulpt is loaded and output is expected */}
+            {(skulptLoaded) && (
+              <div
+                ref={canvasRef}
+                style={{
+                  minHeight: 600,
+                  maxHeight: 600,
+                  width: "100%",
+                  border: "1px solid black",
+                  backgroundColor: "white",
+                  display: outputText.trim() !== "" || canvasRef.current?.children.length ? "block" : "none",
+                }}
+              />
+            )}
+            
+            {/* Show output text only if there's output */}
+            {outputText.trim() !== "" && (
+              <pre
+                ref={outputRef}
+                style={{
+                  backgroundColor: "#f0f0f0",
+                  padding: "10px",
+                  minHeight: 100,
+                  maxHeight: 200,
+                  overflowY: "auto",
+                  whiteSpace: "pre-wrap",
+                  marginTop: 10,
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+                dangerouslySetInnerHTML={{ __html: outputText }}
+              />
+            )}
           </>
         )}
       </div>

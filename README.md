@@ -27,7 +27,7 @@ The app utilizes Google's Gemini API to send queries to and receive replies from
 ### App Orientation
 The first page of the app is a "splashgate" that prevents users from interacting with the main page until two points of data are collected. Firstly, the terms and conditions of the app must be agreed to. This app is meant for educational use only, with the intention that the educator will use it as a demonstration for their class to be guided through. At this time, many LLMs require their users to be 18 years old or older to use them. As a result, the user needs to agree that they meet and will follow the Gemini agreement criteria or they cannot use the app.
 
-Secondly, any interaction with an LLM in this app requires an API key. This API key is also required for access beyond the splashgate. This key is not as required as the agreement to the terms and conditions, since a non-functional key will result in an LLM return error - so access to the LLM would still be barred. **Please Note - ** The API key is currently saved in a state variable in the React frontend. This posses somewhat of a security risk on unsecured networks as the API key can detected 
+Secondly, any interaction with an LLM in this app requires an API key. This API key is also required for access beyond the splashgate. This key is not as required as the agreement to the terms and conditions, since a non-functional key will result in an LLM return error - so access to the LLM would still be barred. **Please Note - ** The API key is tokenized by the Django server and cached in the browser. The API key is hidden via the token, but will only be cleared in 1 hour or after the user manually clears their browser cache.
 
 ### Django Server
 
