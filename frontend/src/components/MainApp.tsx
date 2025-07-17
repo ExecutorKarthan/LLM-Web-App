@@ -54,13 +54,20 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
     setResponse("");
     setError(""); 
     // Attempt to pass the query and API key to the backend for processing if submitted - wait for a response
-    try {
-      const res = await axios.post(import.meta.env.VITE_BACKEND_URL + "/api/ask/", {
-        prompt: userQuery,
-        apiKey: userApiKey,
-      });
-      setResponse(res.data.response);
-    } 
+      try {
+        const res = await axios.post(
+          import.meta.env.VITE_BACKEND_URL + "/api/ask/",
+          {
+            prompt: userQuery.trim(),
+          },
+          {
+            headers: {
+              "X-Token": userApiKey,
+            },
+          }
+        );
+        setResponse(res.data.response);
+    }
     //If an error occurs, provide it to the user
     catch (err: any) {
       const backendError = err?.response?.data?.error || "Unexpected error occurred.";
