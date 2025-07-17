@@ -1,12 +1,24 @@
 // Import needed modules
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SplashGate from "./components/Splashgate";
 import MainApp from "./components/MainApp";
 
 // Run app
 function App() {
+  
   // Store API key in React state only
-  const [apiKey, setApiKey] = useState<string | null>(null);
+   const [apiKey, setApiKey] = useState<string | null>(() => {
+    return sessionStorage.getItem("gemini_token");
+  });
+
+   // When token changes, sync it to sessionStorage
+  useEffect(() => {
+    if (apiKey) {
+      sessionStorage.setItem("gemini_token", apiKey);
+    } else {
+      sessionStorage.removeItem("gemini_token");
+    }
+  }, [apiKey]);
 
   // Called when user enters their API key 
   const handleUnlock = (key: string) => {

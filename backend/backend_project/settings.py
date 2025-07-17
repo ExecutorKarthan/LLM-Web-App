@@ -1,15 +1,15 @@
 # Import needed modules
+import os
 from pathlib import Path
 from dotenv import load_dotenv
-import os
 from django.core.asgi import get_asgi_application
+from corsheaders.defaults import default_headers
 
 # Load environmental variables from the '.env' file and define them
 load_dotenv()
 GEMINI_KEY = os.getenv("GEMINI_KEY")
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = os.getenv("DEBUG") == "True"
-
 
 # Define directory pathing
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +26,6 @@ ALLOWED_HOSTS = [
     "llm-web-app-backend.onrender.com",
     "localhost"                 
 ]
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -60,6 +59,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173"
 ]
 
+# Permit the custom header for tokens
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-Token",  # Add your custom header here (case insensitive)
+]
 
 # Defines locations for URL routs and how to render HTML
 ROOT_URLCONF = 'backend_project.urls'
