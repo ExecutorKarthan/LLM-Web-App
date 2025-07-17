@@ -221,7 +221,17 @@ screen.setworldcoordinates(-${Math.floor(width / 2)}, -${Math.floor(height / 2)}
           </div>
         ))}
       </div>
-      <div style={{ marginTop: 20, width: "100%" }}>
+      <div style={{
+        marginTop: 20,
+        width: "100%",
+        minHeight: 600, // same as canvas
+        maxHeight: 600,
+        display: "flex",
+        justifyContent: "center", // center horizontally
+        alignItems: "center",     // center vertically
+        border: "1px solid black", // ensure it matches the canvas border
+        backgroundColor: "white",  // ensure visual consistency
+      }}>
         {/* Dsiplay the image of the puzzle when its button is clicked */}
         {showPuzzle && selectedPuzzle ? (
           <img
