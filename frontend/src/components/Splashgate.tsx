@@ -1,15 +1,21 @@
+// Import needed modules
 import { useState } from "react";
 
+// Create an interface for props for type enforcement
 interface SplashGateProps {
   onUnlock: (apiKey: string) => void;
 }
 
+// Create an initial page that will restrict people from accessing the app without accepting the terms or providing an API key
 const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
+  // Create constants and their mutators for reference
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
 
+  // Generate behavior for the submission button
   const handleSubmit = () => {
+    // Create logic that requires both terms agreement and an API key to proceed
     if (!agreed) {
       setError("You must agree to the terms.");
       return;
@@ -18,12 +24,14 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
       setError("API key is required.");
       return;
     }
-
+    // Store the entered key for use  assuming terms and key are met and exist
     onUnlock(apiKey.trim());
   };
 
+  // Return the HTML for the browser to show
   return (
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
+      {/* Define a section for terms and conditions */}
       <h1>Terms & Conditions</h1>
       <p>
         By using this app, you agree to the following terms and conditions:
@@ -49,6 +57,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         <br /><br />
         By clicking "Continue" or using the application, you confirm that you understand and accept these conditions.
       </p>
+      {/* Create a check box and to agree to terms and conditions */}
       <label style={{ display: "block", margin: "1rem 0" }}>
         <input
           type="checkbox"
@@ -57,19 +66,29 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         />
         I agree to the terms and conditions
       </label>
-
+      {/* Create a space to add your Gemini Key or be directed to get one */}
       <label style={{ display: "block", marginBottom: "1rem" }}>
-        Enter your API key:
+        Enter your Gemini API key:
         <input
           type="text"
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
         />
+        <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
+          Don’t have a Gemini API key?&nbsp;
+          <a
+            href="https://makersuite.google.com/app/apikey"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#007bff", textDecoration: "underline" }}
+          >
+            Get one here
+          </a>.
+        </small>
       </label>
-
       {error && <p style={{ color: "red" }}>{error}</p>}
-
+      {/* Create a button to submit the terms acceptance and API key */}
       <button onClick={handleSubmit} style={{ padding: "0.75rem 1.5rem" }}>
         Continue
       </button>
@@ -77,4 +96,5 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
   );
 };
 
+// Export the component for use
 export default SplashGate;

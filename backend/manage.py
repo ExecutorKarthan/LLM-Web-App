@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-"""Django's command-line utility for administrative tasks."""
+# Import needed modules
 import os
 import sys
 
-
+# Main function for Django admin tasks
 def main():
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend_project.settings')
@@ -17,6 +16,6 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
-
+# Execute main
 if __name__ == '__main__':
     main()

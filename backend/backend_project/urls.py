@@ -1,33 +1,9 @@
-"""
-URL configuration for backend_project project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-# backend/backend_project/urls.py
-
+# Import needed modules
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
-import os
 
+# Define URL patters for app navigation
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
 ]
-
-# if settings.DEBUG:
-#     # Adding a print here to confirm this block is hit and what document_root it uses
-#     print(f"DEBUG is TRUE. Adding static URL pattern with document_root: {os.path.join(settings.BASE_DIR, 'assets/static')}")
-#     urlpatterns += static(settings.STATIC_URL, document_root=os.path.join(settings.BASE_DIR, 'assets/static'))
