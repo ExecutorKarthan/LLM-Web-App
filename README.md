@@ -20,9 +20,9 @@ The app is written in TypeScript as a way for me to impose more strict typing re
 
 The app utilizes Google's Gemini API to send queries to and receive replies from Gemini. The app needed access to some style of LLM and Gemini was chosen due to its easy access to a free tier operations. There are numerous models of Gemini, each with their own limits in terms of character count and number of requests per day, so the app will change which model it queries depending on model availability and if its limits are exceeded. The Gemini API documentation can be found here: [https://ai.google.dev/gemini-api/docs] (https://ai.google.dev/gemini-api/docs)
 
- Due to its reliance on Gemini, the app requires the user to have a valid Gemini API key. These can be gotten free of charge here: ["https://makersuite.google.com/app/apikey"] (https://makersuite.google.com/app/apikey)  
+Due to its reliance on Gemini, the app requires the user to have a valid Gemini API key. These can be gotten free of charge here: ["https://makersuite.google.com/app/apikey"] (https://makersuite.google.com/app/apikey)  
 
- The app also needs to allow the user to write and execute code in Python. This is done through the use of the Monaco Editor [https://microsoft.github.io/monaco-editor/] (https://microsoft.github.io/monaco-editor/) and a Skulpt Display [https://skulpt.org/] (https://skulpt.org/). Monaco is a module that will create editor objects in React that serves as an IDE-like text environment, making it user friendly to use. Skulpt is a module that compiles Python into Javascript, thus taking the inputted Python code into a Javascript form that can be run in the web-browser. 
+The app also needs to allow the user to write and execute code in Python. This is done through the use of the Monaco Editor [https://microsoft.github.io/monaco-editor/] (https://microsoft.github.io/monaco-editor/) and a Skulpt Display [https://skulpt.org/] (https://skulpt.org/). Monaco is a module that will create editor objects in React that serves as an IDE-like text environment, making it user friendly to use. Skulpt is a module that compiles Python into Javascript, thus taking the inputted Python code into a Javascript form that can be run in the web-browser. 
 
 ### App Orientation
 The first page of the app is a "splashgate" that prevents users from interacting with the main page until two points of data are collected. Firstly, the terms and conditions of the app must be agreed to. This app is meant for educational use only, with the intention that the educator will use it as a demonstration for their class to be guided through. At this time, many LLMs require their users to be 18 years old or older to use them. As a result, the user needs to agree that they meet and will follow the Gemini agreement criteria or they cannot use the app.
@@ -30,13 +30,14 @@ The first page of the app is a "splashgate" that prevents users from interacting
 Secondly, any interaction with an LLM in this app requires an API key. This API key is also required for access beyond the splashgate. This key is not as required as the agreement to the terms and conditions, since a non-functional key will result in an LLM return error - so access to the LLM would still be barred. **Please Note - ** The API key is tokenized by the Django server and cached in the browser. The API key is hidden via the token, but will only be cleared in 1 hour or after the user manually clears their browser cache.
 
 ### Django Server
+The tokenization of the user's API key, as well as the interaction between the Gemini LLM and this app, is handled by a Python Django server. I choose to use a server primarily for security and flexibility reasons. To handle an API key in the frontend provides a variety of security risks since the API key is exposed to both the client and network traffic. The most secure way to utilize the API key without requiring a database would be to create a token on the backend. Since this process is backend, it is not visible to the user nor anyone else outside of the initial API key entry. The token can then be saved to the browser securely, which it can expire in 1 hour or be cleared, while allowing the user to revisit the site and not need to constantly reenter their API key.
 
+The flexibility offered by the Django server was the second reason I wanted to use it. When coding in the frontend, you are limited in your ability to log errors and to respond to problems as they arise. Frontend logging is generally limited to console logs, which are stored temporarily in the user's browser. With a Django server, logs are easily available to the developer and can be set up to notify you in the event of a system failure. Additionally, if the LLM response takes a long time (enough to time-out) or a model isn't available, the Django server can address such events reliably through error-handling logic. 
 
-
-
+Finally, the server allows me to serve static assets to the frontend. All of the previously stored code and images for the example puzzles are accessed from the Django server. This allows me to limit the size of the frontend app and perform dynamic updates to the puzzles if I need to add more options.  
 
 ## Installation
-This project require no installation. It is a webpage that is deployed to Netlify and be located online. It just needs to be viewed on the web.
+This project require no installation. It is a webpage that is deployed to Render and be located online.
 
 ## License
 This product is protected by a [MIT License](http://choosealicense.com/licenses/mit), specifically:
@@ -65,9 +66,8 @@ SOFTWARE.
 ## Contributing
 I, Alex Messina, am the primary author of this code. Its layout and interface was designed by me with suggestions and feedback provided by the members of the Washington University - ADD LAB. The interface is supported by Ant Design [https://ant.design/](https://ant.design/) and its LLm interactions are handled by Google's large language Gemini models through their API [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs). 
  
-
 ## Tests
-No tests were prepared for this project. Errant behavior can be seen in console and visibly since it is a front-end application.
+No tests were prepared for this project. 
 
 ## Questions
 My GitHub username is [ExecutorKarthan](https://github.com/ExecutorKarthan) and this project can be found at [https://llm-web-app-4970.onrender.com/] (https://llm-web-app-4970.onrender.com/)
