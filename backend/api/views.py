@@ -66,7 +66,7 @@ def tokenize_key(request):
                 return JsonResponse({ "error": "API key is required" }, status=400)
             # Create a random token and save it in the cache
             token = str(uuid.uuid4())
-            cache.set(token, api_key, timeout=3600)
+            cache.set(token, api_key, timeout=5400)
             return JsonResponse({ "token": token })
         except Exception as e:
             return JsonResponse({ "error": "Server error", "details": str(e) }, status=500)
