@@ -1,6 +1,8 @@
 // Import needed modules
 import { useState } from "react";
 import axios from "axios";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 // Create an interface for props for type enforcement
 interface SplashGateProps {
@@ -14,6 +16,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false); // 🔐 Added toggle for visibility
 
   // Generate behavior for the submission button
   const handleSubmit = async () => {
@@ -43,7 +46,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
     catch (err) {
       console.error(err);
       setError("Failed to connect to the server.");
-  }
+    }
   };
 
   // Return the HTML for the browser to show
@@ -85,16 +88,39 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         I agree to the terms and conditions
       </label>
       {/* Create a space to add your Gemini Key or be directed to get one */}
-      <label style={{ display: "block", marginBottom: "1rem" }}>
+      <label style={{ display: "block", marginBottom: "1rem", position: "relative" }}>
         Enter your Gemini API key:
         <input
-          type="text"
+          type={showApiKey ? "text" : "password"}
           value={apiKey}
           aria-label="Gemini API Key"
           placeholder="Paste your API key here"
           onChange={(e) => setApiKey(e.target.value)}
-          style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            marginTop: "0.5rem",
+            paddingRight: "2.5rem" // Ensure room for icon button
+          }}
         />
+        <button
+          type="button"
+          onClick={() => setShowApiKey(prev => !prev)}
+          style={{
+            position: "absolute",
+            top: "2.35rem",
+            right: "-2.8rem",
+            background: "transparent",
+            border: "none",
+            fontSize: "1rem",
+            cursor: "pointer",
+            padding: 0,
+            lineHeight: 1
+          }}
+          aria-label={showApiKey ? "Hide API key" : "Show API key"}
+        >
+          <FontAwesomeIcon icon={showApiKey ? faEyeSlash : faEye} />
+        </button>
         <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
           Don’t have a Gemini API key?&nbsp;
           <a
