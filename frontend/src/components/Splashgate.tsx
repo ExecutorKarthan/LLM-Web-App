@@ -119,7 +119,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
           }}
           aria-label={showApiKey ? "Hide API key" : "Show API key"}
         >
-          <FontAwesomeIcon icon={showApiKey ? faEyeSlash : faEye} />
+          <FontAwesomeIcon icon={showApiKey ? faEye : faEyeSlash} />
         </button>
         <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
           Don’t have a Gemini API key?&nbsp;
