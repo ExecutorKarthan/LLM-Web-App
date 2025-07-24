@@ -2,7 +2,7 @@
 import time
 import os
 import uuid, json
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from google import genai
@@ -156,3 +156,18 @@ def ask_gemini(request, max_retries=2, delay=2):
         {"error": "All Gemini models are currently unavailable. Please try again later."},
         status=status.HTTP_503_SERVICE_UNAVAILABLE
     )
+
+# ✅ Add a view to clear a token from cache
+@api_view(["POST"])
+def clear_token(request):
+    # Extract token from request body
+    try:
+        body = json.loads(request.body)
+        token = body.get("token")
+        if not token:
+            return Response({ "error": "Token is required." }, status=status.HTTP_400_BAD_REQUEST)
+        # Delete the token from cache
+        cache.delete(token)
+        return Response({ "message": "Token cleared successfully." }, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({ "error": "Failed to clear token.", "details": str(e) }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

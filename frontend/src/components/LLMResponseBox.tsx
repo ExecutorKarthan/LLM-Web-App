@@ -25,6 +25,13 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     return processResponse(response);
   };
 
+  // Function to clear the stored token
+  const handleClearToken = () => {
+    sessionStorage.removeItem("gemini_token");
+    alert("Token cleared!");
+    window.location.reload();
+  };
+
   // Return HTML for rendering
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -52,14 +59,19 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
             marginTop: 12,
             display: "flex",
             justifyContent: "center",
+            gap: "12px",
           }}
         >
-          {/* Create a button to transfer the code to the editor */}
-          <Button onClick={() => onSaveCode(processResponse(response))}>
-            Save to Editor
-          </Button>
         </div>
       )}
+       {/* Create a button to transfer the code to the editor */}
+        <Button onClick={() => onSaveCode(processResponse(response))}>
+          Save to Editor
+        </Button>
+        {/* Add a button to clear the token */}
+        <Button danger onClick={handleClearToken}>
+          Clear Token
+        </Button>
     </div>
   );
 };

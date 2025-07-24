@@ -16,7 +16,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false); // 🔐 Added toggle for visibility
+  const [showApiKey, setShowApiKey] = useState(false);
 
   // Generate behavior for the submission button
   const handleSubmit = async () => {

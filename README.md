@@ -39,14 +39,14 @@ Once beyond the splashgate, the main App has four sections as seen in this diagr
 
 The "LLM Entry Box" is where you can type your query that will be sent to some version of Gemini. Your query can be structured in any form of text, but must be text as there is no way to submit any other medium via the app. The "Submit request" button will take the text entered in the box and send it to the Django backend server. The Django server will then retrieve the user's API key with the user's token, then forwards that API key and the submitted text to the Gemini LLM. 
 
-Once the LLM responds to the Django server, that response is then forwarded to the React frontend. Assuming the response is Python code, the frontend will process it by removing code explanations provided by the LLM and it will add needed formatting so the code will be recognized as valid Python code. This finalzed text is then displayed in the "LLM Response Box". This interaction is modeled here:
+Once the LLM responds to the Django server, that response is then forwarded to the React frontend. Assuming the response is Python code, the frontend will process it by removing code explanations provided by the LLM and it will add needed formatting so the code will be recognized as valid Python code. This finalized text is then displayed in the "LLM Response Box". This interaction is modeled here:
 ![Gemini Query App Interaction Image](./assets/Gemini-Query.png)
 
-After text is displayed in the response box, a button will be made available that allows the finalize code to be copied directly to the "Python Code Editor" - the box on the lower left.
+After text is displayed in the response box, a button will be made available that allows the finalized code to be copied directly to the "Python Code Editor" - the box on the lower left.
 
 The "Python Code Editor" is the Monaco code editor object, thus providing a clean way for users to view the LLM generated code and edit it if necessary. The editor will accept code from other sources as well, so a user could just type in their own code or copy it from a **verified and trusted** source. 
 
-To the right of the "Python Code Editor", is the "Skulpt Display". This display has a "Run Code" button to execute code that appears in the "Python Code Editor". This is done totally in the web broaswer, as seen in this illistration:
+To the right of the "Python Code Editor", is the "Skulpt Display". This display has a "Run Code" button to execute code that appears in the "Python Code Editor". This is done totally in the web browser, as seen in this illustration:
 ![Run Code App Interaction Image](./assets/Run-Code.png)
 
 Below the "Run Code" button is a bank of buttons that each correspond to a different maze. They are organized by:
@@ -70,7 +70,7 @@ When clicked, each button will populate the code needed to draw the maze in the 
 
 Below all the buttons, the graphical output area can be found - displaying the graphical output of the executed code in the "Python Code Editor" . 
 
-Below th graphical output area is the text output area - displaying the text output of the executed code in the "Python Code Editor".
+Below the graphical output area is the text output area - displaying the text output of the executed code in the "Python Code Editor".
 
 ### Django Backend Orientation
 The tokenization of the user's API key, as well as the interaction between the Gemini LLM and this app, is handled by a Python Django server. It is demonstrated here:
