@@ -100,6 +100,7 @@ def ask_gemini(request, max_retries=2, delay=2):
     ]
 
     # Get token from cookie instead of header
+    print("Incoming cookies:", request.COOKIES)
     token = request.COOKIES.get("gemini_token")
     if not token:
         return Response(
