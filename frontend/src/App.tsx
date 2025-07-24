@@ -6,17 +6,17 @@ import MainApp from "./components/MainApp";
 // Run app
 function App() {
   
-  // Store API key in React state only
+  // Store API key in local storage
    const [apiKey, setApiKey] = useState<string | null>(() => {
-    return sessionStorage.getItem("gemini_token");
+    return localStorage.getItem("gemini_token");
   });
 
    // When token changes, sync it to sessionStorage
   useEffect(() => {
     if (apiKey) {
-      sessionStorage.setItem("gemini_token", apiKey);
+     localStorage.setItem("gemini_token", apiKey);
     } else {
-      sessionStorage.removeItem("gemini_token");
+      localStorage.removeItem("gemini_token");
     }
   }, [apiKey]);
 

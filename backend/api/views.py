@@ -76,7 +76,8 @@ def tokenize_key(request):
                 max_age=5400,              
                 secure=True,              
                 httponly=True,            
-                samesite="None"
+                samesite="None",
+                path="/"
             )
             return response
 
