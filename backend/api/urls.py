@@ -7,5 +7,5 @@ urlpatterns = [
     path("tokenize-key/", tokenize_key),
     path("puzzles/", get_puzzles),
     path("ask/", ask_gemini),
-     path('api/clear-token/', clear_token, name='clear_token'),
+    path("clear-token/", clear_token),
 ]

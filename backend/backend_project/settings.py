@@ -64,6 +64,9 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-Token",  # Add your custom header here (case insensitive)
 ]
 
+# Allow cookies to be used
+CORS_ALLOW_CREDENTIALS = True
+
 # Defines locations for URL routs and how to render HTML
 ROOT_URLCONF = 'backend_project.urls'
 TEMPLATES = [
@@ -127,6 +130,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 5400  
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  
 
 # Set Logging for server
 LOGGING = {

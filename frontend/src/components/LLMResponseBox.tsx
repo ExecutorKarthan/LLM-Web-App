@@ -2,6 +2,7 @@
 import React from "react";
 import processResponse from "../utils/responseProcessor";
 import { Button } from "antd";
+import axios from "axios";
 
 // Create an interface for type safety
 interface LLMResponseProps {
@@ -25,12 +26,23 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     return processResponse(response);
   };
 
-  // Function to clear the stored token
-  const handleClearToken = () => {
+// Function to clear the stored token
+const handleClearToken = async () => {
+  try {
     sessionStorage.removeItem("gemini_token");
-    alert("Token cleared!");
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/clear-token/`,
+      {},
+      { withCredentials: true }
+    );
+    alert("Token and session cleared.");
     window.location.reload();
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete token.");
+  }
+};
+
 
   // Return HTML for rendering
   return (

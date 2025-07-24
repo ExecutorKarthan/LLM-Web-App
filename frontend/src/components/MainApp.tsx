@@ -61,9 +61,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
             prompt: userQuery.trim(),
           },
           {
-            headers: {
-              "X-Token": userApiKey,
-            },
+            withCredentials: true 
           }
         );
         setResponse(res.data.response);

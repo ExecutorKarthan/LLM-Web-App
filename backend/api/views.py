@@ -2,7 +2,7 @@
 import time
 import os
 import uuid, json
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from google import genai
@@ -67,14 +67,27 @@ def tokenize_key(request):
             # Create a random token and save it in the cache
             token = str(uuid.uuid4())
             cache.set(token, api_key, timeout=5400)
-            return JsonResponse({ "token": token })
+
+            # Set token in secure, HttpOnly cookie instead of returning it in JSON
+            response = JsonResponse({ "message": "Token set in secure cookie." })
+            response.set_cookie(
+                key="gemini_token",
+                value=token,
+                max_age=5400,              
+                secure=True,              
+                httponly=True,            
+                samesite="Lax",             
+                path="/"
+            )
+            return response
+
         except Exception as e:
             return JsonResponse({ "error": "Server error", "details": str(e) }, status=500)
     return JsonResponse({ "error": "Invalid request method" }, status=405)
 
 # Restricts the view to only POST requests for asking the LLM
 @api_view(["POST"])
-# Create a function to handle  querying the LLM
+# Create a function to handle querying the LLM
 def ask_gemini(request, max_retries=2, delay=2):
     # Define a list of Gemini models to be used
     model_names = [
@@ -84,12 +97,13 @@ def ask_gemini(request, max_retries=2, delay=2):
         "gemini-2.0-flash-lite",
         "gemini-1.5-pro",
         "gemini-1.5-flash"
-    ]   
-    # Get token from header
-    token = request.headers.get("X-Token")
+    ]
+
+    # Get token from cookie instead of header
+    token = request.COOKIES.get("gemini_token")
     if not token:
         return Response(
-            {"error": "Missing X-Token header."},
+            {"error": "Missing gemini_token cookie."},
             status=status.HTTP_401_UNAUTHORIZED
         )
     # Lookup API key from cache
@@ -157,17 +171,9 @@ def ask_gemini(request, max_retries=2, delay=2):
         status=status.HTTP_503_SERVICE_UNAVAILABLE
     )
 
-# ✅ Add a view to clear a token from cache
+# Add a view to clear a token from cache and clear the cookie
 @api_view(["POST"])
 def clear_token(request):
-    # Extract token from request body
-    try:
-        body = json.loads(request.body)
-        token = body.get("token")
-        if not token:
-            return Response({ "error": "Token is required." }, status=status.HTTP_400_BAD_REQUEST)
-        # Delete the token from cache
-        cache.delete(token)
-        return Response({ "message": "Token cleared successfully." }, status=status.HTTP_200_OK)
-    except Exception as e:
-        return Response({ "error": "Failed to clear token.", "details": str(e) }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    response = Response({"message": "Token deleted."}, status=200)
+    response.delete_cookie("gemini_token", path="/", samesite="None")
+    return response
