@@ -20,33 +20,33 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
 
   // Generate behavior for the submission button
   const handleSubmit = async () => {
-  if (!agreed) {
-    setError("You must agree to the terms.");
-    return;
-  }
-  if (!apiKey.trim()) {
-    setError("API key is required.");
-    return;
-  }
-
-  try {
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`,
-      { apiKey: apiKey.trim() },
-      { withCredentials: true }
-    );
-
-    if (response.status === 200) {
-      onUnlock("Success"); // Proceed to app — no need for token
-    } else {
-      setError("Failed to authenticate API key.");
+    if (!agreed) {
+      setError("You must agree to the terms.");
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    setError("Failed to connect to the server.");
-  }
-};
+    if (!apiKey.trim()) {
+      setError("API key is required.");
+      return;
+    }
 
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`,
+        { apiKey: apiKey.trim() },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        localStorage.setItem("gemini_token", apiKey.trim()); // Store key in local storage
+        onUnlock(apiKey.trim()); // Proceed to app with key
+      } else {
+        setError("Failed to authenticate API key.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to connect to the server.");
+    }
+  };
 
   // Return the HTML for the browser to show
   return (

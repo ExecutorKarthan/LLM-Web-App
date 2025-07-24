@@ -53,6 +53,14 @@ def get_puzzles(request):
     # Pass the list of puzzle objects to the frontend in JSON format
     return JsonResponse(puzzles, safe=False)
 
+# Add a function to check if there is already a cookie ready to use
+def check_cookie(request):
+    token = request.COOKIES.get("gemini_token")
+    if token:
+        return JsonResponse({"token_exists": True})
+    else:
+        return JsonResponse({"token_exists": False})
+
 # Add a function to tokenize the API key for security reasons
 @csrf_exempt
 def tokenize_key(request):
@@ -80,7 +88,6 @@ def tokenize_key(request):
                 path="/"
             )
             return response
-
         except Exception as e:
             return JsonResponse({ "error": "Server error", "details": str(e) }, status=500)
     return JsonResponse({ "error": "Invalid request method" }, status=405)
@@ -100,7 +107,6 @@ def ask_gemini(request, max_retries=2, delay=2):
     ]
 
     # Get token from cookie instead of header
-    print("Incoming cookies:", request.COOKIES)
     token = request.COOKIES.get("gemini_token")
     if not token:
         return Response(
@@ -175,10 +181,12 @@ def ask_gemini(request, max_retries=2, delay=2):
 # Add a view to clear a token from cache and clear the cookie
 @api_view(["POST"])
 def clear_token(request):
-    token = request.COOKIES.get("gemini_token")
+    # Check to see if there is a token
+    token = request.COOKIES.get("gemini_token") 
+    # Delete the token from cache
     if token:
         cache.delete(token)
-
+    # Respond and then delete the cookie
     response = JsonResponse({"message": "Token cleared."})
     response.delete_cookie("gemini_token", samesite='Lax')
     return response
