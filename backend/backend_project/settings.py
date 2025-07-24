@@ -67,6 +67,11 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 # Allow cookies to be used
 CORS_ALLOW_CREDENTIALS = True
 
+# Define trusted origins for cookies
+CSRF_TRUSTED_ORIGINS = [
+    "https://llm-web-app-4970.onrender.com/",  
+]
+
 # Defines locations for URL routs and how to render HTML
 ROOT_URLCONF = 'backend_project.urls'
 TEMPLATES = [

@@ -70,9 +70,9 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         School districts are responsible for ensuring compliance with their institution’s policies regarding student interaction with AI technologies.
         <br /><br />
         <strong>4. API Key Handling and Browser Security</strong><br />
-        Your API key is temporarily stored in your browser’s session cache as a token (not on any external server). For security reasons:<br />
+        Your API key is temporarily stored in your browser as a token in a secure cookie (not on any external server). For security reasons:<br />
         &nbsp;&nbsp;&bull; Do <strong>not</strong> leave your browser unattended while the key is active.<br />
-        &nbsp;&nbsp;&bull; <strong>Refreshing</strong> or <strong>closing</strong> the tab or browser will NOT automatically clear the API key from memory.<br />
+        &nbsp;&nbsp;&bull; <strong>Refreshing</strong> or <strong>closing</strong> the tab or browser will NOT automatically clear the secure cookie.<br />
         &nbsp;&nbsp;&bull; To exit the application securely, please clear your session cache <strong>or</strong> use the "clear token" button.<br />
         &nbsp;&nbsp;&bull; It is your responsibility to manage this key securely and to avoid unauthorized access.
         <br /><br />
