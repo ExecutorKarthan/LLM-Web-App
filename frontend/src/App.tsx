@@ -27,7 +27,6 @@ function App(): JSX.Element {
   // Create constatns and their mutations for reference
   const [cookiePresent, setCookiePresent] = useState<boolean>(false);
   const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
-  const [apiKey, setapiKey] = useState<string>("");
 
   useEffect(() => {
     const checkCookie = async () => {
@@ -41,29 +40,11 @@ function App(): JSX.Element {
     }
   }, []);
 
-  console.log(cookiePresent);
-
-  // Store token in local storage
-  //  const [token, setToken] = useState<string | null>(() => {
-  //   return localStorage.getItem("gemini_token");
-  // });
-
-  // When token changes, sync it to localStorage
-  // useEffect({
-  //   console.log(cookie)
-
-  // }, []);
-
-  // Called when user enters their API key 
-  const handleUnlock = (key: string): void => {
-    // setToken(key);
-  };
-
   // If no API key, show SplashGate to collect it
-  if (termsAgreed && (cookiePresent || apiKey)) {
+  if (termsAgreed && cookiePresent){
     return <MainApp />;
   } else {
-    return <SplashGate onUnlock={handleUnlock} />;
+    return <SplashGate />;
   }
 
   // If API key is set, show main app with key passed as prop

@@ -4,13 +4,8 @@ import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-// Create an interface for props for type enforcement
-interface SplashGateProps {
-  onUnlock: (token: string) => void;
-}
-
 // Create an initial page that will restrict people from accessing the app without accepting the terms or providing an API key
-const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
+const SplashGate: React.FC = () => {
   
   // Create constants and their mutators for reference
   const [agreed, setAgreed] = useState(false);
@@ -35,10 +30,9 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         { apiKey: apiKey.trim() },
         { withCredentials: true }
       );
-
       if (response.status === 200) {
-        localStorage.setItem("gemini_token", apiKey.trim()); // Store key in local storage
-        onUnlock(apiKey.trim()); // Proceed to app with key
+        localStorage.setItem("gemini_token", "agreed"); 
+        window.location.reload();
       } else {
         setError("Failed to authenticate API key.");
       }
