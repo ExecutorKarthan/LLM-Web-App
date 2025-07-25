@@ -39,14 +39,14 @@ Once beyond the splashgate, the main App has four sections as seen in this diagr
 
 The "LLM Entry Box" is where you can type your query that will be sent to some version of Gemini. Your query can be structured in any form of text, but must be text as there is no way to submit any other medium via the app. The "Submit request" button will take the text entered in the box and send it to the Django backend server. The Django server will then retrieve the user's API key with the user's token, then forwards that API key and the submitted text to the Gemini LLM. 
 
-Once the LLM responds to the Django server, that response is then forwarded to the React frontend. Assuming the response is Python code, the frontend will process it by removing code explanations provided by the LLM and it will add needed formatting so the code will be recognized as valid Python code. This finalzed text is then displayed in the "LLM Response Box". This interaction is modeled here:
+Once the LLM responds to the Django server, that response is then forwarded to the React frontend. Assuming the response is Python code, the frontend will process it by removing code explanations provided by the LLM and it will add needed formatting so the code will be recognized as valid Python code. This finalized text is then displayed in the "LLM Response Box". This interaction is modeled here:
 ![Gemini Query App Interaction Image](./assets/Gemini-Query.png)
 
-After text is displayed in the response box, a button will be made available that allows the finalize code to be copied directly to the "Python Code Editor" - the box on the lower left.
+After text is displayed in the response box, a button will be made available that allows the finalized code to be copied directly to the "Python Code Editor" - the box on the lower left.
 
 The "Python Code Editor" is the Monaco code editor object, thus providing a clean way for users to view the LLM generated code and edit it if necessary. The editor will accept code from other sources as well, so a user could just type in their own code or copy it from a **verified and trusted** source. 
 
-To the right of the "Python Code Editor", is the "Skulpt Display". This display has a "Run Code" button to execute code that appears in the "Python Code Editor". This is done totally in the web broaswer, as seen in this illistration:
+To the right of the "Python Code Editor", is the "Skulpt Display". This display has a "Run Code" button to execute code that appears in the "Python Code Editor". This is done totally in the web browser, as seen in this illustration:
 ![Run Code App Interaction Image](./assets/Run-Code.png)
 
 Below the "Run Code" button is a bank of buttons that each correspond to a different maze. They are organized by:
@@ -70,13 +70,13 @@ When clicked, each button will populate the code needed to draw the maze in the 
 
 Below all the buttons, the graphical output area can be found - displaying the graphical output of the executed code in the "Python Code Editor" . 
 
-Below th graphical output area is the text output area - displaying the text output of the executed code in the "Python Code Editor".
+Below the graphical output area is the text output area - displaying the text output of the executed code in the "Python Code Editor".
 
 ### Django Backend Orientation
 The tokenization of the user's API key, as well as the interaction between the Gemini LLM and this app, is handled by a Python Django server. It is demonstrated here:
 ![Splashgate App Interaction Image](./assets/Tokenization.png)
 
-I chose to use a server primarily for security and flexibility reasons. Handling an API key in the frontend exposes it to various security risks since the key is exposed to both the client and network traffic. The most secure way to utilize the API key without requiring a database is to create a token on the backend. Since this process is backend, it is not visible to the user nor anyone else outside of the initial API key entry. The token can then be save in the browser, where it can expire in 90 minutes or be cleared manually, allowing the user to revisit the site without needing to constantly reenter their API key. 
+I chose to use a server primarily for security and flexibility reasons. Handling an API key in the frontend exposes it to various security risks since the key is exposed to both the client and network traffic. The most secure way to utilize the API key without requiring a database is to create a token on the backend. Since this process is backend, it is not visible to the user nor anyone else outside of the initial API key entry. The token can then be saved in the browser, allowing the user to reload or revisit the site without needing to constantly reenter their API key. This token will expire in 90 minutes, which is generally longer than most class periods. If the user needs to securely remove the token before that, the user can clear the token by using the "clear token" button in the app or delete their browser's cache.
 
 The flexibility offered by the Django server was the second reason I wanted to use it. When coding in the frontend, you are limited in your ability to log errors and respond to problems as they arise. Frontend logging is generally limited to console logs, which are stored temporarily in the user's browser. Additionally, the Django server handles long response times, model unavailability, and other errors more reliably than a frontend-only solution.  With a Django server, logs are easily available to the developer and can be set up to notify you in the event of a system failure. Additionally, if the LLM response takes a long time (enough to time-out) or a model isn't available, the Django server can address such events reliably through error-handling logic. 
 

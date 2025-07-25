@@ -44,13 +44,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 # Allow CORS to operate depending on origins
@@ -62,6 +62,14 @@ CORS_ALLOWED_ORIGINS = [
 # Permit the custom header for tokens
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-Token",  # Add your custom header here (case insensitive)
+]
+
+# Allow cookies to be used
+CORS_ALLOW_CREDENTIALS = True
+
+# Define trusted origins for cookies
+CSRF_TRUSTED_ORIGINS = [
+    "https://llm-web-app-4970.onrender.com/",  
 ]
 
 # Defines locations for URL routs and how to render HTML
@@ -127,6 +135,9 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_AGE = 5400  
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  
 
 # Set Logging for server
 LOGGING = {

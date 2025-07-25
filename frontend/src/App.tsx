@@ -1,37 +1,56 @@
 // Import needed modules
-import { useEffect, useState } from "react";
+import { JSX, useEffect, useState } from "react";
+import axios from "axios";
 import SplashGate from "./components/Splashgate";
 import MainApp from "./components/MainApp";
 
-// Run app
-function App() {
-  
-  // Store API key in React state only
-   const [apiKey, setApiKey] = useState<string | null>(() => {
-    return sessionStorage.getItem("gemini_token");
-  });
-
-   // When token changes, sync it to sessionStorage
-  useEffect(() => {
-    if (apiKey) {
-      sessionStorage.setItem("gemini_token", apiKey);
-    } else {
-      sessionStorage.removeItem("gemini_token");
+// Check if cookie token exists on the server
+const checkTokenServerSide = async (): Promise<boolean> => {
+  try {
+    // Query the Django server looking for a secure cookie to exist
+    const res = await axios.get(
+      import.meta.env.VITE_BACKEND_URL + "/api/check-cookie/",
+      { withCredentials: true }
+    );
+    // Return true if the cookie exists
+    if (res.data.token_exists === true) {
+      return true;
     }
-  }, [apiKey]);
-
-  // Called when user enters their API key 
-  const handleUnlock = (key: string) => {
-    setApiKey(key);
-  };
-
-  // If no API key, show SplashGate to collect it
-  if (!apiKey) {
-    return <SplashGate onUnlock={handleUnlock} />;
+    // Return false if the cookie does not exist
+    return false;
+  } catch (err) {
+    console.error("Failed to check token:", err);
+    return false;
   }
+};
 
-  // If API key is set, show main app with key passed as prop
-  return <MainApp userApiKey={apiKey} />;
+// Run app
+function App(): JSX.Element {
+  // Create constatns and their mutations for reference
+  const [cookiePresent, setCookiePresent] = useState<boolean>(false);
+  const [termsAgreed, setTermsAgreed] = useState<boolean>(false);
+
+  // Use a hook to check for previous agreement and cookies
+  useEffect(() => {
+    const checkCookie = async () => {
+      const present = await checkTokenServerSide();
+      setCookiePresent(present);
+    };
+    checkCookie();
+
+    if (localStorage.getItem("gemini_token")) {
+      setTermsAgreed(true);
+    }
+  }, []);
+
+  // If the cookie and terms are present, proceed to the main app
+  if (termsAgreed && cookiePresent){
+    return <MainApp />;
+  }
+  // If a cookie is missing or the terms are not agreed to, move to the splashgate to collect them 
+  else {
+    return <SplashGate />;
+  }
 }
 
 // Export function for use

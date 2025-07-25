@@ -4,23 +4,18 @@ import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
-// Create an interface for props for type enforcement
-interface SplashGateProps {
-  onUnlock: (token: string) => void;
-}
-
 // Create an initial page that will restrict people from accessing the app without accepting the terms or providing an API key
-const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
+const SplashGate: React.FC = () => {
   
   // Create constants and their mutators for reference
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
-  const [showApiKey, setShowApiKey] = useState(false); // 🔐 Added toggle for visibility
+  const [showApiKey, setShowApiKey] = useState(false);
 
   // Generate behavior for the submission button
   const handleSubmit = async () => {
-    // Create logic that requires both terms agreement and an API key to proceed
+    // Test if has agreed to terms of service and has an API key
     if (!agreed) {
       setError("You must agree to the terms.");
       return;
@@ -29,21 +24,21 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
       setError("API key is required.");
       return;
     }
-    // Store the entered key for use  assuming terms and key are met and exist
+    // If there is an API key and Terms are agreed, tokenize the key and set terms to true
     try {
-      // Send the API key to the backend to be turned into a token
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`, {
-        apiKey: apiKey.trim(),
-      });
-      const token = response.data.token;
-      if (token) {
-        onUnlock(token); 
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`,
+        { apiKey: apiKey.trim() },
+        { withCredentials: true }
+      );
+      if (response.status === 200) {
+        localStorage.setItem("gemini_token", "agreed"); 
+        // Reload the page to send the user to the main page
+        window.location.reload();
       } else {
-        setError("Failed to receive token from server.");
+        setError("Failed to authenticate API key.");
       }
-    } 
-    // Thrown an error if an issue occurs
-    catch (err) {
+    } catch (err) {
       console.error(err);
       setError("Failed to connect to the server.");
     }
@@ -71,9 +66,10 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         School districts are responsible for ensuring compliance with their institution’s policies regarding student interaction with AI technologies.
         <br /><br />
         <strong>4. API Key Handling and Browser Security</strong><br />
-        Your API key is temporarily stored in your browser’s memory (not on any external server). For security reasons:<br />
+        Your API key is temporarily stored in your browser as a token in a secure cookie (not on any external server). For security reasons:<br />
         &nbsp;&nbsp;&bull; Do <strong>not</strong> leave your browser unattended while the key is active.<br />
-        &nbsp;&nbsp;&bull; <strong>Refreshing</strong> or <strong>closing</strong> the tab or browser will automatically clear the API key from memory.<br />
+        &nbsp;&nbsp;&bull; <strong>Refreshing</strong> or <strong>closing</strong> the tab or browser will NOT automatically clear the secure cookie.<br />
+        &nbsp;&nbsp;&bull; To exit the application securely, please clear your session cache <strong>or</strong> use the "clear token" button.<br />
         &nbsp;&nbsp;&bull; It is your responsibility to manage this key securely and to avoid unauthorized access.
         <br /><br />
         By clicking "Continue" or using the application, you confirm that you understand and accept these conditions.
@@ -100,9 +96,10 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
             width: "100%",
             padding: "0.5rem",
             marginTop: "0.5rem",
-            paddingRight: "2.5rem" // Ensure room for icon button
+            paddingRight: "2.5rem" 
           }}
         />
+        {/* Create a button to show the API key*/}
         <button
           type="button"
           onClick={() => setShowApiKey(prev => !prev)}
@@ -121,6 +118,7 @@ const SplashGate: React.FC<SplashGateProps> = ({ onUnlock }) => {
         >
           <FontAwesomeIcon icon={showApiKey ? faEye : faEyeSlash} />
         </button>
+        {/* Provide guidence to get an API key*/}
         <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
           Don’t have a Gemini API key?&nbsp;
           <a

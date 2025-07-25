@@ -2,6 +2,7 @@
 import React from "react";
 import processResponse from "../utils/responseProcessor";
 import { Button } from "antd";
+import axios from "axios";
 
 // Create an interface for type safety
 interface LLMResponseProps {
@@ -24,6 +25,24 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     if (!response) return "";
     return processResponse(response);
   };
+
+// Function to clear the stored token
+const handleClearToken = async () => {
+  try {
+    localStorage.removeItem("gemini_token");
+    await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/clear-token/`,
+      {},
+      { withCredentials: true }
+    );
+    alert("Token and session cleared.");
+    window.location.reload();
+  } catch (err) {
+    console.error(err);
+    alert("Failed to delete token.");
+  }
+};
+
 
   // Return HTML for rendering
   return (
@@ -52,14 +71,19 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
             marginTop: 12,
             display: "flex",
             justifyContent: "center",
+            gap: "12px",
           }}
         >
-          {/* Create a button to transfer the code to the editor */}
-          <Button onClick={() => onSaveCode(processResponse(response))}>
-            Save to Editor
-          </Button>
         </div>
       )}
+       {/* Create a button to transfer the code to the editor */}
+        <Button onClick={() => onSaveCode(processResponse(response))}>
+          Save to Editor
+        </Button>
+        {/* Add a button to clear the token */}
+        <Button danger onClick={handleClearToken}>
+          Clear Token
+        </Button>
     </div>
   );
 };

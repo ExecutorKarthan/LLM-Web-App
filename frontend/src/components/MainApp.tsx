@@ -15,12 +15,8 @@ interface Puzzle {
   code: string;
 }
 
-interface MainAppProps {
-  userApiKey: string;
-}
-
 // Define main app
-const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
+const MainApp = () => {
   // Define constants for reference
   const [userQuery, updateQuery] = useState<string>("");
   const [writtenCode, updateCode] = useState<string>(
@@ -61,9 +57,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
             prompt: userQuery.trim(),
           },
           {
-            headers: {
-              "X-Token": userApiKey,
-            },
+            withCredentials: true 
           }
         );
         setResponse(res.data.response);
@@ -130,7 +124,7 @@ const MainApp: React.FC<MainAppProps> = ({ userApiKey }) => {
           <LLMResponseBox
             response={response}
             loading={loading}
-            error={error} // ✅ passed to child
+            error={error} 
             onSaveCode={(code) => updateCode(code)}
           />
         </Col>
