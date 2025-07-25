@@ -15,6 +15,7 @@ const SplashGate: React.FC = () => {
 
   // Generate behavior for the submission button
   const handleSubmit = async () => {
+    // Test if has agreed to terms of service and has an API key
     if (!agreed) {
       setError("You must agree to the terms.");
       return;
@@ -23,7 +24,7 @@ const SplashGate: React.FC = () => {
       setError("API key is required.");
       return;
     }
-
+    // If there is an API key and Terms are agreed, tokenize the key and set terms to true
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`,
@@ -32,6 +33,7 @@ const SplashGate: React.FC = () => {
       );
       if (response.status === 200) {
         localStorage.setItem("gemini_token", "agreed"); 
+        // Reload the page to send the user to the main page
         window.location.reload();
       } else {
         setError("Failed to authenticate API key.");
@@ -94,9 +96,10 @@ const SplashGate: React.FC = () => {
             width: "100%",
             padding: "0.5rem",
             marginTop: "0.5rem",
-            paddingRight: "2.5rem" // Ensure room for icon button
+            paddingRight: "2.5rem" 
           }}
         />
+        {/* Create a button to show the API key*/}
         <button
           type="button"
           onClick={() => setShowApiKey(prev => !prev)}
@@ -115,6 +118,7 @@ const SplashGate: React.FC = () => {
         >
           <FontAwesomeIcon icon={showApiKey ? faEye : faEyeSlash} />
         </button>
+        {/* Provide guidence to get an API key*/}
         <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
           Don’t have a Gemini API key?&nbsp;
           <a

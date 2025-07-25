@@ -181,7 +181,7 @@ def ask_gemini(request, max_retries=2, delay=2):
 # Add a view to clear a token from cache and clear the cookie
 @api_view(["POST"])
 def clear_token(request):
-    # Check to see if there is a token
+    # Get cookie to delete
     token = request.COOKIES.get("gemini_token") 
     # Delete the token from cache
     if token:

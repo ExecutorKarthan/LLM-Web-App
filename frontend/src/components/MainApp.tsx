@@ -124,7 +124,7 @@ const MainApp = () => {
           <LLMResponseBox
             response={response}
             loading={loading}
-            error={error} // ✅ passed to child
+            error={error} 
             onSaveCode={(code) => updateCode(code)}
           />
         </Col>
