@@ -110,7 +110,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ## Contributing
-I, Alex Messina, am the primary author of this code. Its layout and interface was designed by me with suggestions and feedback provided by the members of the Washington University - ADD LAB. The interface is supported by Ant Design [https://ant.design/](https://ant.design/) and its LLM interactions are handled by Google's large language Gemini models through their API [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs). 
+I, Alex Messina, am the primary author of this code. Its layout and interface was designed by me with suggestions and feedback provided by the members of the Washington University - ADD LAB. Special thanks to Jackson Cox and Shubham Natraj for sharing their technical expertise with the educational resources produce to go along with this app. The interface is supported by Ant Design [https://ant.design/](https://ant.design/) and its LLM interactions are handled by Google's large language Gemini models through their API [https://ai.google.dev/gemini-api/docs](https://ai.google.dev/gemini-api/docs). 
  
 ## Tests
 No automated tests have been implemented at this time.
