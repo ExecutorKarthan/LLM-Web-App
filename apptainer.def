@@ -1,0 +1,42 @@
+Bootstrap: docker
+From: python:3.12-slim
+
+%labels
+    Author Alex
+    Version v1.0
+
+%post
+    # Install system dependencies
+    apt-get update && apt-get install -y \
+        curl \
+        nodejs \
+        npm \
+        build-essential \
+        && rm -rf /var/lib/apt/lists/*
+
+    # Install backend deps
+    cd /opt/app/backend
+    pip install --no-cache-dir -r requirements.txt
+    pip install gunicorn
+
+    # Install frontend deps & build
+    cd /opt/app/frontend
+    npm install
+    npm run build
+
+    # Copy built frontend into Django's static dir
+    mkdir -p /opt/app/backend/static
+    cp -r dist/* /opt/app/backend/static/
+
+%files
+    . /opt/app
+
+%environment
+    export PORT=32775
+    export DJANGO_SETTINGS_MODULE=mysite.settings
+    export PYTHONUNBUFFERED=1
+
+%runscript
+    cd /opt/app/backend
+    python manage.py collectstatic --noinput
+    gunicorn mysite.wsgi:application --bind 0.0.0.0:$PORT
