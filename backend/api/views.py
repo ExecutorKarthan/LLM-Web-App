@@ -96,16 +96,6 @@ def tokenize_key(request):
 @api_view(["POST"])
 # Create a function to handle querying the LLM
 def ask_gemini(request, max_retries=2, delay=2):
-    # Define a list of Gemini models to be used
-    model_names = [
-        "gemini-2.5-pro",
-        "gemini-2.5-flash",
-        "gemini-2.0-flash",
-        "gemini-2.0-flash-lite",
-        "gemini-1.5-pro",
-        "gemini-1.5-flash"
-    ]
-
     # Get token from cookie instead of header
     token = request.COOKIES.get("gemini_token")
     if not token:
@@ -127,6 +117,31 @@ def ask_gemini(request, max_retries=2, delay=2):
             {"error": "Prompt is missing in request."},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+    # Dynamically build and cache model list on the first query for this session/key
+    cache_key = f"gemini_models_{hash(api_key)}"
+    model_names = cache.get(cache_key)
+
+    if not model_names:
+        try:
+            client = genai.Client(api_key=api_key)
+            model_names = []
+            for m in client.models.list():
+                if hasattr(m, "supported_generation_methods") and "generateContent" in m.supported_generation_methods:
+                    clean_name = m.name.replace("models/", "")
+                    if "flash" in clean_name or "pro" in clean_name:
+                        model_names.append(clean_name)
+            
+            # Fallback default if list extraction comes up empty
+            if not model_names:
+                model_names = ["gemini-2.5-flash", "gemini-2.5-pro"]
+            
+            # Cache the discovered model list for 12 hours (43200 seconds)
+            cache.set(cache_key, model_names, timeout=43200)
+        except Exception:
+            # Fallback if dynamic fetch fails completely
+            model_names = ["gemini-2.5-flash", "gemini-2.5-pro"]
+
     # Iterate through each model and attempt to query it. If that fails, reattempt and then move to the next model
     for model_name in model_names:
         for attempt in range(max_retries):
@@ -142,7 +157,7 @@ def ask_gemini(request, max_retries=2, delay=2):
                     contents=prompt
                 )
                 message = response.text     
-                #Return the response from the model
+                # Return the response from the model
                 return Response({"response": message}, status=status.HTTP_200_OK)
             # Respond with an error if the LLM query failed due to an invalid API key
             except ClientError as e:
@@ -152,6 +167,13 @@ def ask_gemini(request, max_retries=2, delay=2):
                         {"error": "Invalid or unauthorized API key provided."},
                         status=status.HTTP_401_UNAUTHORIZED
                     )
+                
+                # Handle rate limit / quota exhaustion (429) by gracefully moving to the next model
+                if "429" in error_message or "RESOURCE_EXHAUSTED" in error_message:
+                    print(f"Model {model_name} rate limited/quota exceeded. Trying next model...")
+                    time.sleep(delay)
+                    break 
+
                 return Response(
                     {"error": f"Client error: {error_message}"},
                     status=status.HTTP_400_BAD_REQUEST
