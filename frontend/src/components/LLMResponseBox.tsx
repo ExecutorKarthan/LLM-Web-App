@@ -3,6 +3,7 @@ import React from "react";
 import processResponse from "../utils/responseProcessor";
 import { Button } from "antd";
 import axios from "axios";
+import { BACKEND_URL } from "../config.js";
 
 // Create an interface for type safety
 interface LLMResponseProps {
@@ -26,23 +27,35 @@ const LLMResponseBox: React.FC<LLMResponseProps> = ({
     return processResponse(response);
   };
 
-// Function to clear the stored token
-const handleClearToken = async () => {
-  try {
-    localStorage.removeItem("gemini_token");
-    await axios.post(
-      `${import.meta.env.VITE_BACKEND_URL}/api/clear-token/`,
-      {},
-      { withCredentials: true }
-    );
-    alert("Token and session cleared.");
-    window.location.reload();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to delete token.");
-  }
-};
+  // Logs the user out of Gemini. The real API key lives server-side
+  // (see views.tokenize_key / clear_token: it is cached against a UUID
+  // stored in an httponly cookie that JS can neither read nor clear), so
+  // the actual cleanup is the POST to /api/clear-token/.
+  //
+  // Reloading afterwards re-runs App's server-side session check, which
+  // now finds no valid token and shows the splash gate again. There is no
+  // client-side flag to reset: the server is the only authority.
+  //
+  // BACKEND_URL comes from src/config.ts. Do not use
+  // import.meta.env.VITE_BACKEND_URL here: when it is unset the URL becomes
+  // "undefined/api/clear-token/" and the server never sees the request.
+  const handleClearToken = async () => {
+    try {
+      await axios.post(
+        `${BACKEND_URL}` + "/api/clear-token/",
+        {},
+        { withCredentials: true }
+      );
+      alert("Token and session cleared.");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete token.");
+    }
+  };
 
+  // True when there is a finished, error-free response to save
+  const hasResponse = Boolean(response) && !loading && !error;
 
   // Return HTML for rendering
   return (
@@ -64,26 +77,25 @@ const handleClearToken = async () => {
         {/* Populate the response box with the response from the LLM */}
         {displayContent()}
       </div>
-      {/* If there is a response, display the save to editor button */}
-      {response && !loading && !error && (
-        <div
-          style={{
-            marginTop: 12,
-            display: "flex",
-            justifyContent: "center",
-            gap: "12px",
-          }}
-        >
-        </div>
-      )}
-       {/* Create a button to transfer the code to the editor */}
-        <Button onClick={() => onSaveCode(processResponse(response))}>
-          Save to Editor
-        </Button>
-        {/* Add a button to clear the token */}
+      <div
+        style={{
+          marginTop: 12,
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+        }}
+      >
+        {/* Transfer the code to the editor, only once there is a response */}
+        {hasResponse && (
+          <Button onClick={() => onSaveCode(processResponse(response))}>
+            Save to Editor
+          </Button>
+        )}
+        {/* Clear the session token, always available */}
         <Button danger onClick={handleClearToken}>
           Clear Token
         </Button>
+      </div>
     </div>
   );
 };

@@ -19,7 +19,11 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
 PUZZLE_CODE_DIR = BASE_DIR / "assets/puzzles"
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Replace your current STATICFILES_STORAGE line with this:
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
@@ -69,7 +73,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Define trusted origins for cookies
 CSRF_TRUSTED_ORIGINS = [
-    "https://llm-web-app-4970.onrender.com/",  
+    "https://llm-web-app-4970.onrender.com",  
 ]
 
 # Defines locations for URL routs and how to render HTML
