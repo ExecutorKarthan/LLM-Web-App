@@ -1,5 +1,5 @@
 # LLM-Web-App
-This educational tool supports students from 6th grade and up by demonstrating the benefits, drawbacks, and ethical considerations involved in using large language models (LLMs). It is strictly for educational use, specifically as a demonstration of AI's capabilities. This app is deployed via Render and can be viewed here [https://llm-web-app-4970.onrender.com/](https://llm-web-app-4970.onrender.com/)
+This educational tool supports students from 6th grade and up by demonstrating the benefits, drawbacks, and ethical considerations involved in using large language models (LLMs). It is strictly for educational use, specifically as a demonstration of AI's capabilities. This app is deployed via Render and can be viewed here [https://llm-web-app-h161.onrender.com](https://llm-web-app-h161.onrender.com)
 
 ## Table of Contents
 1. [Description](#description)
@@ -116,6 +116,6 @@ I, Alex Messina, am the primary author of this code. Its layout and interface wa
 No automated tests have been implemented at this time.
 
 ## Questions
-My GitHub username is [ExecutorKarthan](https://github.com/ExecutorKarthan) and this project can be found at [https://llm-web-app-4970.onrender.com/](https://llm-web-app-4970.onrender.com/)
+My GitHub username is [ExecutorKarthan](https://github.com/ExecutorKarthan) and this project can be found at [https://llm-web-app-h161.onrender.com](https://llm-web-app-h161.onrender.com)
 
 If you have questions or concerns about this project, please email me at me@alexmessina.dev
