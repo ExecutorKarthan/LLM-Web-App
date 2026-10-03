@@ -13,10 +13,6 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles_collected'
 PUZZLE_CODE_DIR = BASE_DIR / "assets/puzzles"
-if DEBUG:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-else:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ############################################
 # Environment
@@ -32,6 +28,11 @@ if not SECRET_KEY:
     )
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+if DEBUG:
+    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 ############################################
 # Hosts
