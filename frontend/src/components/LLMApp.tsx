@@ -6,6 +6,7 @@ import LLMResponseBox from "./LLMResponseBox";
 import PythonEditor from "./PythonEditor";
 import SkulptDisplay from "./SkulptDisplay";
 import { Row, Col} from "antd";
+import { BACKEND_URL } from '../config.js';
 
 // Create interfaces for type safety
 interface Puzzle {
@@ -16,7 +17,7 @@ interface Puzzle {
 }
 
 // Define main app
-const MainApp = () => {
+const LLMApp = () => {
   // Define constants for reference
   const [userQuery, updateQuery] = useState<string>("");
   const [writtenCode, updateCode] = useState<string>(
@@ -52,7 +53,7 @@ const MainApp = () => {
     // Attempt to pass the query and API key to the backend for processing if submitted - wait for a response
       try {
         const res = await axios.post(
-          import.meta.env.VITE_BACKEND_URL + "/api/ask/",
+          `${BACKEND_URL}` + "/api/ask/",
           {
             prompt: userQuery.trim(),
           },
@@ -178,4 +179,4 @@ const MainApp = () => {
 };
 
 // Export component for use
-export default MainApp;
+export default LLMApp;

@@ -1,21 +1,32 @@
 // Import needed modules
 import { useState } from "react";
+import type { FC } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { BACKEND_URL } from "../config.js";
+import getCSRFToken from "../utils/CSRFReader.js";
 
-// Create an initial page that will restrict people from accessing the app without accepting the terms or providing an API key
-const SplashGate: React.FC = () => {
-  
-  // Create constants and their mutators for reference
+interface SplashGateProps {
+  onAuthenticated?: () => void;
+}
+
+const SplashGate: FC<SplashGateProps> = ({ onAuthenticated }) => {
   const [agreed, setAgreed] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [error, setError] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState<string[]>([]);
 
-  // Generate behavior for the submission button
+  const addStatus = (line: string) => setStatus((prev) => [...prev, line]);
+
   const handleSubmit = async () => {
-    // Test if has agreed to terms of service and has an API key
+    if (submitting) return;
+
+    setError("");
+    setStatus([]);
+
     if (!agreed) {
       setError("You must agree to the terms.");
       return;
@@ -24,36 +35,69 @@ const SplashGate: React.FC = () => {
       setError("API key is required.");
       return;
     }
-    // If there is an API key and Terms are agreed, tokenize the key and set terms to true
+
+    setSubmitting(true);
     try {
+      await axios.get(`${BACKEND_URL}/api/csrf/`, { withCredentials: true });
+      addStatus("CSRF token fetched.");
+
+      const csrfToken = getCSRFToken();
+      const url = `${BACKEND_URL}/api/tokenize-key/`;
+
       const response = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/tokenize-key/`,
+        url,
         { apiKey: apiKey.trim() },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            'X-CSRFToken': csrfToken || '',
+          },
+        },
       );
-      if (response.status === 200) {
-        localStorage.setItem("gemini_token", "agreed"); 
-        // Reload the page to send the user to the main page
-        window.location.reload();
-      } else {
-        setError("Failed to authenticate API key.");
+      addStatus(`Server accepted the key (HTTP ${response.status}).`);
+
+      const check = await axios.get(`${BACKEND_URL}/api/check-cookie/`, {
+        withCredentials: true,
+      });
+      
+      if (!check.data?.token_exists) {
+        addStatus("Session check failed: the server did not find a valid token.");
+        setError(
+          "Your key was accepted, but the session did not stick. " +
+          "The browser may be blocking the cookie, or the server lost the token. " +
+          "Please try again."
+        );
+        return;
       }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to connect to the server.");
+      addStatus("Session check passed.");
+
+      localStorage.setItem("splash_terms_agreed", "true");
+      setApiKey("");
+
+      // Immediately transition to the next page/app view
+      if (onAuthenticated) {
+        onAuthenticated();
+      } else {
+        // Fallback if no parent callback was passed (reloads the page to clear the gate)
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error("Tokenize error:", err);
+      addStatus("Request failed.");
+      setError(err.response?.data?.error || "Failed to connect to the server.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Return the HTML for the browser to show
   return (
     <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
-      {/* Define a section for terms and conditions */}
-      <h1>Terms & Conditions</h1>
+      <h1>Terms &amp; Conditions</h1>
       <p>
         By using this app, you agree to the following terms and conditions:
         <br /><br />
         <strong>1. Use in Accordance with Model Provider Terms</strong><br />
-        This tool uses the Gemini large language model provided by Google. Your use of this application must fully comply with Google’s{' '}
+        This tool uses the Gemini large language model provided by Google. Your use of this application must fully comply with Google's{' '}
         <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer">AI Terms of Service</a> and any other applicable terms governing the use of their large language models.
         <br /><br />
         <strong>2. Intended for Academic Use Only</strong><br />
@@ -61,9 +105,9 @@ const SplashGate: React.FC = () => {
         <br /><br />
         <strong>3. No Student Use Without Explicit District Approval</strong><br />
         Students must <strong>not</strong> use this tool unless:<br />
-        &nbsp;&nbsp;&bull; Their school district’s IT department has explicitly approved such use, <strong>and</strong><br />
-        &nbsp;&nbsp;&bull; The use complies with Google’s terms for AI services.<br />
-        School districts are responsible for ensuring compliance with their institution’s policies regarding student interaction with AI technologies.
+        &nbsp;&nbsp;&bull; Their school district's IT department has explicitly approved such use, <strong>and</strong><br />
+        &nbsp;&nbsp;&bull; The use complies with Google's terms for AI services.<br />
+        School districts are responsible for ensuring compliance with their institution's policies regarding student interaction with AI technologies.
         <br /><br />
         <strong>4. API Key Handling and Browser Security</strong><br />
         Your API key is temporarily stored in your browser as a token in a secure cookie (not on any external server). For security reasons:<br />
@@ -74,7 +118,8 @@ const SplashGate: React.FC = () => {
         <br /><br />
         By clicking "Continue" or using the application, you confirm that you understand and accept these conditions.
       </p>
-      {/* Create a check box and to agree to terms and conditions */}
+
+      {/* Checkbox to agree to terms and conditions */}
       <label style={{ display: "block", margin: "1rem 0" }}>
         <input
           type="checkbox"
@@ -83,7 +128,8 @@ const SplashGate: React.FC = () => {
         />
         I agree to the terms and conditions
       </label>
-      {/* Create a space to add your Gemini Key or be directed to get one */}
+
+      {/* API key input */}
       <label style={{ display: "block", marginBottom: "1rem", position: "relative" }}>
         Enter your Gemini API key:
         <input
@@ -96,31 +142,29 @@ const SplashGate: React.FC = () => {
             width: "100%",
             padding: "0.5rem",
             marginTop: "0.5rem",
-            paddingRight: "2.5rem" 
+            paddingRight: "2.5rem",
           }}
         />
-        {/* Create a button to show the API key*/}
         <button
           type="button"
           onClick={() => setShowApiKey(prev => !prev)}
           style={{
             position: "absolute",
             top: "2.35rem",
-            right: "-2.8rem",
+            right: "0.5rem",
             background: "transparent",
             border: "none",
             fontSize: "1rem",
             cursor: "pointer",
             padding: 0,
-            lineHeight: 1
+            lineHeight: 1,
           }}
           aria-label={showApiKey ? "Hide API key" : "Show API key"}
         >
           <FontAwesomeIcon icon={showApiKey ? faEye : faEyeSlash} />
         </button>
-        {/* Provide guidence to get an API key*/}
         <small style={{ display: "block", marginTop: "0.5rem", fontSize: "0.9rem" }}>
-          Don’t have a Gemini API key?&nbsp;
+          Don't have a Gemini API key?&nbsp;
           <a
             href="https://makersuite.google.com/app/apikey"
             target="_blank"
@@ -131,14 +175,22 @@ const SplashGate: React.FC = () => {
           </a>.
         </small>
       </label>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {/* Create a button to submit the terms acceptance and API key */}
-      <button onClick={handleSubmit} style={{ padding: "0.75rem 1.5rem" }}>
-        Continue
+
+      {/* Error message display */}
+      {error && (
+        <p style={{ color: "red", marginBottom: "1rem" }}>{error}</p>
+      )}
+
+      {/* Submit button */}
+      <button
+        onClick={handleSubmit}
+        disabled={submitting}
+        style={{ padding: "0.75rem 1.5rem", cursor: "pointer" }}
+      >
+        {submitting ? "Checking key..." : "Continue"}
       </button>
     </div>
   );
 };
 
-// Export the component for use
 export default SplashGate;
