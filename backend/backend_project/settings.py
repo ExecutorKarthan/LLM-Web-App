@@ -27,7 +27,7 @@ else:
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
-    "llm-web-app-backend.onrender.com",
+    ".onrendewr.com",
     "localhost"                 
 ]
 
@@ -59,7 +59,7 @@ MIDDLEWARE = [
 
 # Allow CORS to operate depending on origins
 CORS_ALLOWED_ORIGINS = [
-    "https://llm-web-app-4970.onrender.com",
+    "https://llm-web-app-h161.onrender.com",
     "http://localhost:5173"
 ]
 
@@ -73,7 +73,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Define trusted origins for cookies
 CSRF_TRUSTED_ORIGINS = [
-    "https://llm-web-app-4970.onrender.com",  
+    "https://llm-web-app-h161.onrender.com",  
 ]
 
 # Defines locations for URL routs and how to render HTML
