@@ -16,10 +16,9 @@ from backend_project.views import frontend
 from api import views as api_views
 
 # Root of the React dist folder — used for top-level static files
-# like RDKit_minimal.wasm that sit outside the /assets/ prefix.
 DIST_ROOT = settings.BASE_DIR.parent / "frontend" / "dist"
 
-# Define URL patters for app navigation
+# Define URL patterns for app navigation
 urlpatterns = [
     path('admin/', admin.site.urls),
     
@@ -32,6 +31,19 @@ urlpatterns = [
     path("api/test-key/", api_views.test_api_key),
     path("api/csrf/", api_views.get_csrf_token),
     path("api/clear-token/", api_views.clear_token),
+
+# ── React build assets (/assets/...) ───────────────────────────────────
+    re_path(
+        r"^assets/(?P<path>.*)$",
+        serve,
+        {"document_root": DIST_ROOT / "assets"},
+    ),
+
+    # ── Root route → React ─────────────────────────────────────────────────
+    path("", frontend, name="frontend_root"),
+
+    # ── SPA fallback — anything not matched above → React index.html ───────
+    re_path(r"^(?!api/|admin/|assets/).*$", frontend, name="frontend_catchall"),
 ]
 
 if settings.DEBUG:
