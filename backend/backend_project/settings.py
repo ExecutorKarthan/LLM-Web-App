@@ -27,7 +27,7 @@ else:
 
 # Define which hosts are permitted
 ALLOWED_HOSTS = [
-    "https://llm-web-app-h161.onrender.com",
+    "llm-web-app-h161.onrender.com",
     "localhost"                 
 ]
 
